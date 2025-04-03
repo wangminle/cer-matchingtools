@@ -5,7 +5,8 @@
 示例测试文件，展示如何使用ASRMetrics类计算字准确率
 """
 
-from utils import ASRMetrics
+# 修改导入语句，假设脚本从根目录运行
+from src.utils import ASRMetrics
 
 def test_chinese_text():
     """测试中文文本的字准确率计算"""

@@ -1,0 +1,2 @@
+原始文件	标注文件	ASR字数	标注字数	字准确率
+asr_result3.txt	ref_text3.txt	37	37	0.9730
