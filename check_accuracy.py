@@ -3,15 +3,55 @@ import sys
 import argparse
 from src.utils import ASRMetrics
 
+def read_file_with_multiple_encodings(file_path):
+    """
+    尝试使用多种编码方式读取文件内容
+    
+    Args:
+        file_path (str): 文件路径
+        
+    Returns:
+        str: 文件内容
+        
+    Raises:
+        Exception: 如果所有编码方式都失败则抛出异常
+    """
+    # 尝试的编码格式列表
+    encodings = ['utf-8', 'gbk', 'gb2312', 'gb18030', 'ansi']
+    
+    # 存储可能的异常
+    errors = []
+    
+    # 依次尝试不同的编码
+    for encoding in encodings:
+        try:
+            # 对于 'ansi'，我们使用系统默认编码
+            if encoding == 'ansi':
+                with open(file_path, 'r') as f:
+                    content = f.read().strip()
+            else:
+                with open(file_path, 'r', encoding=encoding) as f:
+                    content = f.read().strip()
+            return content
+        except UnicodeDecodeError as e:
+            # 记录错误但继续尝试其他编码
+            errors.append((encoding, str(e)))
+            continue
+    
+    # 如果所有编码都失败，抛出异常
+    error_msg = f"无法解码文件 {file_path}，尝试了以下编码：\n"
+    for encoding, error in errors:
+        error_msg += f"- {encoding}: {error}\n"
+    raise Exception(error_msg)
+
 def calculate_accuracy(ref_file_path, asr_file_path):
     """
     读取文件并计算字准确率
     """
     try:
-        with open(ref_file_path, 'r', encoding='utf-8') as f:
-            ref_text = f.read().strip()
-        with open(asr_file_path, 'r', encoding='utf-8') as f:
-            asr_text = f.read().strip()
+        # 使用多种编码尝试读取文件
+        ref_text = read_file_with_multiple_encodings(ref_file_path)
+        asr_text = read_file_with_multiple_encodings(asr_file_path)
 
         # 使用 ASRMetrics 计算指标
         metrics = ASRMetrics.calculate_detailed_metrics(ref_text, asr_text)

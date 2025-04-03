@@ -9,6 +9,8 @@
 - 自动计算字准确率（Character Accuracy Rate）
 - 统计文档字数信息
 - 支持导出统计结果为TXT或CSV格式
+- 支持多种文本编码（UTF-8、GBK、GB2312、GB18030、ANSI）
+- 提供800x600的默认窗口大小，支持窗口最大化
 
 ## 安装依赖
 
@@ -91,5 +93,5 @@ python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
 ## 注意事项
 
 - 支持的文件格式：纯文本文件(.txt)
-- 文件编码：UTF-8
+- 文件编码：支持UTF-8、GBK、GB2312、GB18030及系统默认编码（ANSI）
 - 字准确率计算是基于字符级别的，特别适合中文等没有明确词边界的语言 

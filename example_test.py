@@ -8,6 +8,48 @@
 # 修改导入语句，假设脚本从根目录运行
 from src.utils import ASRMetrics
 
+def read_file_with_multiple_encodings(file_path):
+    """
+    尝试使用多种编码方式读取文件内容
+    
+    Args:
+        file_path (str): 文件路径
+        
+    Returns:
+        str: 文件内容
+        
+    Raises:
+        Exception: 如果所有编码方式都失败则抛出异常
+    """
+    # 尝试的编码格式列表
+    encodings = ['utf-8', 'gbk', 'gb2312', 'gb18030', 'ansi']
+    
+    # 存储可能的异常
+    errors = []
+    
+    # 依次尝试不同的编码
+    for encoding in encodings:
+        try:
+            # 对于 'ansi'，我们使用系统默认编码
+            if encoding == 'ansi':
+                with open(file_path, 'r') as f:
+                    content = f.read().strip()
+            else:
+                with open(file_path, 'r', encoding=encoding) as f:
+                    content = f.read().strip()
+            print(f"成功使用 {encoding} 编码读取文件 {file_path}")
+            return content
+        except UnicodeDecodeError as e:
+            # 记录错误但继续尝试其他编码
+            errors.append((encoding, str(e)))
+            continue
+    
+    # 如果所有编码都失败，抛出异常
+    error_msg = f"无法解码文件 {file_path}，尝试了以下编码：\n"
+    for encoding, error in errors:
+        error_msg += f"- {encoding}: {error}\n"
+    raise Exception(error_msg)
+
 def test_chinese_text():
     """测试中文文本的字准确率计算"""
     # 示例中文文本
@@ -48,12 +90,9 @@ def test_english_text():
 def test_from_files():
     """从文件读取文本并计算字准确率"""
     try:
-        # 尝试从文件读取
-        with open('example_ref.txt', 'r', encoding='utf-8') as f:
-            reference = f.read()
-        
-        with open('example_hyp.txt', 'r', encoding='utf-8') as f:
-            hypothesis = f.read()
+        # 尝试从文件读取，支持多种编码
+        reference = read_file_with_multiple_encodings('example_ref.txt')
+        hypothesis = read_file_with_multiple_encodings('example_hyp.txt')
         
         # 计算字准确率
         accuracy = ASRMetrics.calculate_accuracy(reference, hypothesis)
@@ -70,6 +109,8 @@ def test_from_files():
             f.write("这是一个示范标准文本用于测试字准确率计算功能")
         
         print("已创建示例文件，请重新运行测试")
+    except Exception as e:
+        print(f"读取文件时出错: {e}")
 
 if __name__ == "__main__":
     print("===== 中文文本测试 =====")
