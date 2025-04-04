@@ -6,6 +6,7 @@ import jiwer
 from functools import partial
 from utils import ASRMetrics
 
+
 class ASRComparisonTool:
     def __init__(self, root):
         self.root = root
