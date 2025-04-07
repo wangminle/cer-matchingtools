@@ -11,6 +11,9 @@
 - 支持导出统计结果为TXT或CSV格式
 - 支持多种文本编码（UTF-8、GBK、GB2312、GB18030、ANSI）
 - 提供800x600的默认窗口大小，支持窗口最大化
+- **新增：基于jieba分词的中文文本预处理**
+- **新增：精确的中文字符位置定位和错误分析**
+- **新增：中文文本标准化处理（全/半角转换、数字统一等）**
 
 ## 安装依赖
 
@@ -19,6 +22,13 @@
 ```bash
 pip install -r requirements.txt
 ```
+
+主要依赖：
+- jiwer>=2.5.0：用于计算字/词错误率
+- pandas>=1.3.5：用于数据处理和导出
+- tk>=0.1.0：提供GUI界面支持
+- **jieba>=0.42.1：中文分词库**
+- **python-Levenshtein>=0.12.2：计算编辑距离**
 
 ## 使用方法
 
@@ -50,18 +60,27 @@ python example_test.py
 - 中文文本的字准确率计算示例
 - 英文文本的字准确率计算示例
 - 从文件读取文本并计算字准确率的示例
+- **新增：复杂中文文本的字准确率计算示例**
 
 ### 3. 命令行工具方式
 
 直接比较两个指定的文件：
 
 ```bash
-python check_accuracy.py --ref 参考文件路径 --asr ASR结果文件路径
+python check_accuracy.py --ref 参考文件路径 --asr ASR结果文件路径 [选项]
 ```
+
+可用选项：
+- `--details`：显示详细的错误分析，包括错误高亮和字符位置信息
+- `--no-jieba`：提示不使用jieba分词（当前版本中此选项仅作为提示）
 
 例如：
 ```bash
+# 基本用法
 python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
+
+# 显示详细错误分析
+python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt --details
 ```
 
 命令行工具会显示详细的评估结果，包括字准确率、错误率、替换/删除/插入错误数等指标。
@@ -80,7 +99,13 @@ python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
 - I：插入错误数
 - N：标准文本中的字符总数
 
-计算过程中先对文本进行预处理，包括去除标点符号、转换为小写、去除多余空格等。
+**改进的中文字准确率计算流程：**
+
+1. **分词预处理**：使用jieba对中文文本进行分词，提高对中文语义的理解
+2. **文本标准化**：处理全/半角字符、统一数字表达、移除标点符号等
+3. **字符位置定位**：使用jieba.tokenize获取每个字符在原文中的精确位置
+4. **编辑距离计算**：使用Levenshtein距离算法计算字符级别的编辑距离
+5. **错误分析与高亮**：识别替换、删除、插入错误，并提供可视化的错误高亮
 
 ## 项目结构
 
@@ -94,27 +119,6 @@ python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
 
 - 支持的文件格式：纯文本文件(.txt)
 - 文件编码：支持UTF-8、GBK、GB2312、GB18030及系统默认编码（ANSI）
-- 字准确率计算是基于字符级别的，特别适合中文等没有明确词边界的语言 
-
-import jieba
-
-def preprocess_chinese_text(text):
-    # 使用jieba进行分词
-    words = jieba.cut(text)
-    # 重新组合文本，保持原始字符
-    return "".join(words)
-
-def normalize_chinese_text(text):
-    # 繁简体转换
-    # 移除特定符号
-    # 统一全角/半角字符
-    # 处理数字、英文字母的统一格式
-    return normalized_text
-
-def get_character_positions(text):
-    positions = []
-    for tk in jieba.tokenize(text):
-        word, start, end = tk
-        for i, char in enumerate(word):
-            positions.append((char, start+i))
-    return positions 
+- 字准确率计算是基于字符级别的，特别适合中文等没有明确词边界的语言
+- **jieba分词初次加载时可能需要几秒钟时间构建词典缓存**
+- **对于专业领域文本，可考虑通过jieba.load_userdict()添加自定义词典** 
