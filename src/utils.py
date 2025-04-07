@@ -1,11 +1,73 @@
 import jiwer
 import difflib
 import re
+import jieba
+import jieba.posseg
+import jieba.analyse
 
 class ASRMetrics:
     """
     提供计算ASR结果准确率的各种指标工具类
     """
+    
+    @staticmethod
+    def preprocess_chinese_text(text):
+        """
+        使用jieba进行中文文本分词预处理
+        
+        Args:
+            text (str): 输入中文文本
+            
+        Returns:
+            str: 分词后重新组合的文本
+        """
+        # 使用jieba进行分词
+        words = jieba.cut(text)
+        # 重新组合文本，保持原始字符
+        return "".join(words)
+    
+    @staticmethod
+    def normalize_chinese_text(text):
+        """
+        针对中文特性的标准化处理
+        
+        Args:
+            text (str): 输入中文文本
+            
+        Returns:
+            str: 标准化后的文本
+        """
+        # 移除标点符号
+        text = re.sub(r'[^\w\s]', '', text)
+        
+        # 统一全角/半角字符
+        full_width = "".join(chr(0xff00 + ord(c) - 0x20) if ord(c) <= 0x7f else c for c in text)
+        
+        # 统一数字格式
+        normalized_text = re.sub(r'[0-9０-９]+', '0', full_width)
+        
+        # 统一空格处理
+        normalized_text = re.sub(r'\s+', '', normalized_text)
+        
+        return normalized_text
+    
+    @staticmethod
+    def get_character_positions(text):
+        """
+        利用jieba的tokenize功能进行精确字符定位
+        
+        Args:
+            text (str): 输入文本
+            
+        Returns:
+            list: 包含(字符, 位置)元组的列表
+        """
+        positions = []
+        for tk in jieba.tokenize(text):
+            word, start, end = tk
+            for i, char in enumerate(word):
+                positions.append((char, start+i))
+        return positions
     
     @staticmethod
     def preprocess_text(text):
@@ -29,8 +91,11 @@ class ASRMetrics:
         # 应用预处理
         processed_text = transformation(text)
         
-        # 对于中文，去除所有空格
-        processed_text = processed_text.replace(" ", "")
+        # 对于中文，先进行jieba分词预处理
+        processed_text = ASRMetrics.preprocess_chinese_text(processed_text)
+        
+        # 应用中文标准化处理
+        processed_text = ASRMetrics.normalize_chinese_text(processed_text)
         
         return processed_text
     
@@ -50,9 +115,13 @@ class ASRMetrics:
         ref_processed = ASRMetrics.preprocess_text(reference)
         hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
-        # 将文本转换为字符列表
-        ref_chars = list(ref_processed)
-        hyp_chars = list(hyp_processed)
+        # 获取字符位置信息
+        ref_positions = ASRMetrics.get_character_positions(ref_processed)
+        hyp_positions = ASRMetrics.get_character_positions(hyp_processed)
+        
+        # 提取字符列表
+        ref_chars = [pos[0] for pos in ref_positions] if ref_positions else list(ref_processed)
+        hyp_chars = [pos[0] for pos in hyp_positions] if hyp_positions else list(hyp_processed)
         
         # 确保两个字符串都不为空
         if len(ref_chars) == 0:
@@ -159,9 +228,13 @@ class ASRMetrics:
         ref_processed = ASRMetrics.preprocess_text(reference)
         hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
-        # 将文本转换为字符列表
-        ref_chars = [char for char in ref_processed]
-        hyp_chars = [char for char in hyp_processed]
+        # 获取字符位置信息
+        ref_positions = ASRMetrics.get_character_positions(ref_processed)
+        hyp_positions = ASRMetrics.get_character_positions(hyp_processed)
+        
+        # 提取字符列表
+        ref_chars = [pos[0] for pos in ref_positions] if ref_positions else list(ref_processed)
+        hyp_chars = [pos[0] for pos in hyp_positions] if hyp_positions else list(hyp_processed)
         
         # 确保列表不为空
         if not ref_chars:

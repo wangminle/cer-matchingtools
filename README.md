@@ -95,3 +95,26 @@ python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
 - 支持的文件格式：纯文本文件(.txt)
 - 文件编码：支持UTF-8、GBK、GB2312、GB18030及系统默认编码（ANSI）
 - 字准确率计算是基于字符级别的，特别适合中文等没有明确词边界的语言 
+
+import jieba
+
+def preprocess_chinese_text(text):
+    # 使用jieba进行分词
+    words = jieba.cut(text)
+    # 重新组合文本，保持原始字符
+    return "".join(words)
+
+def normalize_chinese_text(text):
+    # 繁简体转换
+    # 移除特定符号
+    # 统一全角/半角字符
+    # 处理数字、英文字母的统一格式
+    return normalized_text
+
+def get_character_positions(text):
+    positions = []
+    for tk in jieba.tokenize(text):
+        word, start, end = tk
+        for i, char in enumerate(word):
+            positions.append((char, start+i))
+    return positions 

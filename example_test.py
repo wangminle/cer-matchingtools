@@ -72,6 +72,29 @@ def test_chinese_text():
     ref_highlight, hyp_highlight = ASRMetrics.highlight_errors(reference, hypothesis)
     print(f"标准文本(高亮错误): {ref_highlight}")
     print(f"ASR结果(高亮错误): {hyp_highlight}")
+    
+    print("\n===== 复杂中文文本测试 =====")
+    # 更复杂的中文文本，包含各种常见ASR错误
+    reference_complex = "北京大学是中国最著名的高等学府之一，创建于1898年，位于北京市海淀区，占地面积约3000亩。"
+    hypothesis_complex = "北京大学是中国最著名的高登学府之一，创建与1898年，位于北京市海淀区，占地面积大约三千亩。"
+    # 错误包括：
+    # - "著" -> "登"（形近字）
+    # - "于" -> "与"（近音字）
+    # - "3000" -> "三千"（数字表达方式不同）
+    # - "约" -> "大约"（多字）
+    
+    # 计算字准确率
+    accuracy_complex = ASRMetrics.calculate_accuracy(reference_complex, hypothesis_complex)
+    print(f"复杂中文字准确率: {accuracy_complex:.4f}")
+    
+    # 计算字错误率
+    cer_complex = ASRMetrics.calculate_cer(reference_complex, hypothesis_complex)
+    print(f"复杂中文字错误率: {cer_complex:.4f}")
+    
+    # 显示差异
+    ref_highlight_complex, hyp_highlight_complex = ASRMetrics.highlight_errors(reference_complex, hypothesis_complex)
+    print(f"标准文本(高亮错误): {ref_highlight_complex}")
+    print(f"ASR结果(高亮错误): {hyp_highlight_complex}")
 
 def test_english_text():
     """测试英文文本的字准确率计算"""
