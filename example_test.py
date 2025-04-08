@@ -7,6 +7,8 @@
 
 # 修改导入语句，假设脚本从根目录运行
 from src.utils import ASRMetrics
+import os
+import sys
 
 def read_file_with_multiple_encodings(file_path):
     """
@@ -100,47 +102,126 @@ def test_english_text():
     """测试英文文本的字准确率计算"""
     # 示例英文文本
     reference = "The quick brown fox jumps over the lazy dog."
-    hypothesis = "The quik brown fox jump over the lasy dog"  # 几个拼写错误，缺少句号
+    hypothesis = "The quik brown fox jumped over the lazy dog."  # 拼写错误和时态错误
     
     # 计算字准确率
     accuracy = ASRMetrics.calculate_accuracy(reference, hypothesis)
     print(f"英文字准确率: {accuracy:.4f}")
     
-    # 计算词错误率
+    # 计算字错误率
+    cer = ASRMetrics.calculate_cer(reference, hypothesis)
+    print(f"英文字错误率: {cer:.4f}")
+    
+    # 计算词错误率（对英文更有意义）
     wer = ASRMetrics.calculate_wer(reference, hypothesis)
     print(f"英文词错误率: {wer:.4f}")
 
+def test_filler_words_filtering():
+    """测试过滤语气词的字准确率计算"""
+    print("\n===== 语气词过滤测试 =====")
+    
+    # 示例含有语气词的文本
+    reference = "嗯，今天啊，天气真不错呢，阳光明媚啊。"
+    hypothesis = "今天啊天气真不错嗯阳光明美啊"  # 包含语气词，但位置不同，且有错误
+    
+    # 不过滤语气词的准确率计算
+    accuracy_no_filter = ASRMetrics.calculate_accuracy(reference, hypothesis)
+    print(f"不过滤语气词的字准确率: {accuracy_no_filter:.4f}")
+    
+    # 过滤语气词的准确率计算
+    accuracy_with_filter = ASRMetrics.calculate_accuracy(reference, hypothesis, filter_fillers=True)
+    print(f"过滤语气词后的字准确率: {accuracy_with_filter:.4f}")
+    
+    # 显示过滤前后的差异
+    print("\n语气词过滤前：")
+    ref_highlight, hyp_highlight = ASRMetrics.highlight_errors(reference, hypothesis)
+    print(f"标准文本: {ref_highlight}")
+    print(f"ASR结果: {hyp_highlight}")
+    
+    print("\n语气词过滤后：")
+    ref_highlight_filtered, hyp_highlight_filtered = ASRMetrics.highlight_errors(reference, hypothesis, filter_fillers=True)
+    print(f"标准文本: {ref_highlight_filtered}")
+    print(f"ASR结果: {hyp_highlight_filtered}")
+    
+    # 更复杂的例子：多种语气词混合
+    print("\n更复杂的语气词示例：")
+    reference_complex = "嗯，那个，我想说啊，这个产品呢，质量还是不错的哦，您觉得呢？"
+    hypothesis_complex = "那个我想说啊这个产品呢质量还是不错的您觉得哦"
+    
+    # 分别计算过滤前后的准确率
+    accuracy_no_filter = ASRMetrics.calculate_accuracy(reference_complex, hypothesis_complex)
+    accuracy_with_filter = ASRMetrics.calculate_accuracy(reference_complex, hypothesis_complex, filter_fillers=True)
+    
+    print(f"不过滤语气词的字准确率: {accuracy_no_filter:.4f}")
+    print(f"过滤语气词后的字准确率: {accuracy_with_filter:.4f}")
+    
+    # 显示过滤前后的文本对比
+    print("\n过滤前的文本对比：")
+    ref_text = ASRMetrics.preprocess_text(reference_complex)
+    hyp_text = ASRMetrics.preprocess_text(hypothesis_complex)
+    print(f"预处理后的标准文本: {ref_text}")
+    print(f"预处理后的ASR结果: {hyp_text}")
+    
+    print("\n过滤后的文本对比：")
+    ref_text_filtered = ASRMetrics.preprocess_text(reference_complex, filter_fillers=True)
+    hyp_text_filtered = ASRMetrics.preprocess_text(hypothesis_complex, filter_fillers=True)
+    print(f"过滤语气词后的标准文本: {ref_text_filtered}")
+    print(f"过滤语气词后的ASR结果: {hyp_text_filtered}")
+
 def test_from_files():
-    """从文件读取文本并计算字准确率"""
+    """测试从文件读取文本并计算字准确率"""
+    # 测试文件路径
+    ref_file = "example_ref.txt"
+    hyp_file = "example_hyp.txt"
+    
+    # 确保文件存在
+    if not os.path.exists(ref_file) or not os.path.exists(hyp_file):
+        print(f"测试文件不存在: {ref_file} 或 {hyp_file}")
+        return
+    
+    # 读取文件内容
     try:
-        # 尝试从文件读取，支持多种编码
-        reference = read_file_with_multiple_encodings('example_ref.txt')
-        hypothesis = read_file_with_multiple_encodings('example_hyp.txt')
-        
-        # 计算字准确率
-        accuracy = ASRMetrics.calculate_accuracy(reference, hypothesis)
-        print(f"文件字准确率: {accuracy:.4f}")
-        
-    except FileNotFoundError:
-        print("示例文件不存在，请先创建example_ref.txt和example_hyp.txt文件")
-        
-        # 创建示例文件
-        with open('example_ref.txt', 'w', encoding='utf-8') as f:
-            f.write("这是一个示例标准文本，用于测试字准确率计算功能。")
-        
-        with open('example_hyp.txt', 'w', encoding='utf-8') as f:
-            f.write("这是一个示范标准文本用于测试字准确率计算功能")
-        
-        print("已创建示例文件，请重新运行测试")
+        with open(ref_file, 'r', encoding='utf-8') as f:
+            reference = f.read().strip()
+        with open(hyp_file, 'r', encoding='utf-8') as f:
+            hypothesis = f.read().strip()
     except Exception as e:
         print(f"读取文件时出错: {e}")
+        return
+    
+    # 计算字准确率
+    accuracy = ASRMetrics.calculate_accuracy(reference, hypothesis)
+    print(f"\n从文件读取的字准确率: {accuracy:.4f}")
+    
+    # 计算字错误率
+    cer = ASRMetrics.calculate_cer(reference, hypothesis)
+    print(f"从文件读取的字错误率: {cer:.4f}")
+    
+    # 获取详细指标
+    metrics = ASRMetrics.calculate_detailed_metrics(reference, hypothesis)
+    print(f"详细指标: {metrics}")
 
-if __name__ == "__main__":
-    print("===== 中文文本测试 =====")
+def main():
+    """主函数，运行所有测试"""
+    print("===== 开始字准确率计算测试 =====")
+    
+    # 测试中文文本
+    print("\n----- 中文文本测试 -----")
     test_chinese_text()
     
-    print("\n===== 英文文本测试 =====")
+    # 测试英文文本
+    print("\n----- 英文文本测试 -----")
     test_english_text()
     
-    print("\n===== 文件测试 =====")
-    test_from_files() 
+    # 测试语气词过滤功能
+    print("\n----- 语气词过滤测试 -----")
+    test_filler_words_filtering()
+    
+    # 测试从文件读取
+    print("\n----- 从文件读取测试 -----")
+    test_from_files()
+    
+    print("\n===== 测试完成 =====")
+
+if __name__ == "__main__":
+    main() 
