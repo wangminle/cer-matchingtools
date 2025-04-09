@@ -25,10 +25,16 @@ class ASRComparisonTool:
         
         # 创建主框架分为上下两部分
         self.top_frame = ttk.Frame(root)
-        self.top_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        self.top_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=5)  # 不再扩展，固定上部区域高度
         
         self.bottom_frame = ttk.Frame(root)
-        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)  # 让下部结果区域自动扩展
+        
+        # 语气词过滤设置
+        self.filter_fillers = tk.BooleanVar(value=False)
+        
+        # 提示框变量
+        self.tooltip_window = None
         
         # 初始化UI组件
         self._init_ui()
@@ -53,8 +59,8 @@ class ASRComparisonTool:
         self.asr_canvas_frame = ttk.Frame(self.left_frame)
         self.asr_canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 设置canvas的高度
-        self.asr_canvas = tk.Canvas(self.asr_canvas_frame, bg="white", height=150)
+        # 设置canvas的高度 - 减小高度以缩小中间区域
+        self.asr_canvas = tk.Canvas(self.asr_canvas_frame, bg="white", height=120)  # 原来是150，现在减少到120
         self.asr_canvas.pack(fill=tk.BOTH, expand=True)
         self.asr_canvas.bind("<ButtonPress-1>", self.on_press)
         self.asr_canvas.bind("<B1-Motion>", self.on_drag)
@@ -68,16 +74,93 @@ class ASRComparisonTool:
         self.ref_canvas_frame = ttk.Frame(self.right_frame)
         self.ref_canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 设置canvas的高度
-        self.ref_canvas = tk.Canvas(self.ref_canvas_frame, bg="white", height=150)
+        # 设置canvas的高度 - 减小高度以缩小中间区域
+        self.ref_canvas = tk.Canvas(self.ref_canvas_frame, bg="white", height=120)  # 原来是150，现在减少到120
         self.ref_canvas.pack(fill=tk.BOTH, expand=True)
         self.ref_canvas.bind("<ButtonPress-1>", self.on_press)
         self.ref_canvas.bind("<B1-Motion>", self.on_drag)
         self.ref_canvas.bind("<ButtonRelease-1>", self.on_release)
         
-        # 统计按钮 - 单独放置在顶部框架内，与文件区域分开
-        self.calculate_btn = ttk.Button(self.top_frame, text="开始统计", command=self.calculate_accuracy, width=15)
-        self.calculate_btn.pack(pady=10)
+        # 创建单一控制框架，将统计按钮和过滤勾选框放在同一行
+        self.control_frame = ttk.Frame(self.top_frame)
+        self.control_frame.pack(fill=tk.X, pady=5)
+        
+        # 统计按钮 - 放在中间
+        self.calculate_btn = ttk.Button(self.control_frame, text="开始统计", command=self.calculate_accuracy, width=15)
+        self.calculate_btn.pack(side=tk.LEFT, padx=(350, 0))  # 使用padx左侧增加空间，实现居中效果
+        
+        # 语气词过滤开关 - 放在右侧
+        self.filter_frame = ttk.Frame(self.control_frame)
+        self.filter_frame.pack(side=tk.RIGHT, padx=10)
+        
+        self.filter_check = ttk.Checkbutton(
+            self.filter_frame, 
+            text="语气词过滤", 
+            variable=self.filter_fillers,
+            onvalue=True,
+            offvalue=False
+        )
+        self.filter_check.pack(side=tk.LEFT)
+        
+        # 为语气词过滤开关添加提示信息
+        filter_tooltip = tk.Label(self.filter_frame, text="?", font=("Arial", 9, "bold"), fg="blue")
+        filter_tooltip.pack(side=tk.LEFT, padx=3)
+        
+        # 鼠标悬停显示提示信息
+        def show_tooltip(event):
+            # 避免多个提示框出现，如果已存在则不创建新的
+            if self.tooltip_window:
+                return
+                
+            # 创建提示框
+            self.tooltip_window = tk.Toplevel(self.root)
+            self.tooltip_window.wm_overrideredirect(True)  # 无边框窗口
+            self.tooltip_window.geometry(f"+{event.x_root+10}+{event.y_root+10}")
+            
+            tooltip_text = '开启此选项后，计算字准确率时将会过滤掉"嗯"、"啊"、"呢"等语气词。\n这可以使CER计算更准确地反映实际语义内容。'
+            label = tk.Label(self.tooltip_window, text=tooltip_text, justify=tk.LEFT, 
+                             background="#FFFFCC", relief=tk.SOLID, borderwidth=1, padx=5, pady=5)
+            label.pack()
+            
+            # 构建虚拟边界框（30x30像素的区域）
+            # 获取问号标签的位置和尺寸
+            x = filter_tooltip.winfo_rootx()
+            y = filter_tooltip.winfo_rooty()
+            w = filter_tooltip.winfo_width()
+            h = filter_tooltip.winfo_height()
+            
+            # 计算中心点
+            center_x = x + w/2
+            center_y = y + h/2
+            
+            # 边界框的边界
+            self.tooltip_boundary = {
+                'x1': center_x - 15,  # 左边界
+                'y1': center_y - 15,  # 上边界
+                'x2': center_x + 15,  # 右边界
+                'y2': center_y + 15   # 下边界
+            }
+            
+            # 绑定鼠标移动事件
+            self.root.bind("<Motion>", check_tooltip_boundary)
+            
+        def check_tooltip_boundary(event):
+            """检查鼠标是否在提示框边界内"""
+            if self.tooltip_window:
+                # 获取鼠标当前位置
+                x, y = event.x_root, event.y_root
+                
+                # 检查是否在30x30的边界框内
+                if (x < self.tooltip_boundary['x1'] or 
+                    x > self.tooltip_boundary['x2'] or 
+                    y < self.tooltip_boundary['y1'] or 
+                    y > self.tooltip_boundary['y2']):
+                    # 如果鼠标移出边界框，销毁提示框
+                    self.tooltip_window.destroy()
+                    self.tooltip_window = None
+                    self.root.unbind("<Motion>")
+        
+        filter_tooltip.bind("<Enter>", show_tooltip)
         
         # 下半部分 - 结果显示区域
         self.result_frame = ttk.LabelFrame(self.bottom_frame, text="字准确率统计结果")
@@ -87,12 +170,12 @@ class ASRComparisonTool:
         self.result_tree_frame = ttk.Frame(self.result_frame)
         self.result_tree_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 结果展示表格，设置高度
-        columns = ("原始文件", "标注文件", "ASR字数", "标注字数", "字准确率")
-        self.result_tree = ttk.Treeview(self.result_tree_frame, columns=columns, show="headings", height=8)
+        # 结果展示表格，设置高度 - 增加显示行数
+        columns = ("原始文件", "标注文件", "ASR字数", "标注字数", "字准确率", "过滤语气词")
+        self.result_tree = ttk.Treeview(self.result_tree_frame, columns=columns, show="headings", height=12)  # 原来是8行，现在增加到12行
         for col in columns:
             self.result_tree.heading(col, text=col)
-            self.result_tree.column(col, width=150, anchor="center")
+            self.result_tree.column(col, width=120, anchor="center")
         
         self.result_tree.pack(fill=tk.BOTH, expand=True)
         
@@ -195,6 +278,9 @@ class ASRComparisonTool:
             messagebox.showerror("错误", "ASR文件和标注文件数量不匹配！")
             return
         
+        # 获取语气词过滤设置
+        filter_fillers = self.filter_fillers.get()
+        
         # 逐对计算字准确率
         for asr_file, ref_file in zip(sorted_asr_files, sorted_ref_files):
             try:
@@ -202,8 +288,8 @@ class ASRComparisonTool:
                 asr_text = self.read_file_with_multiple_encodings(asr_file)
                 ref_text = self.read_file_with_multiple_encodings(ref_file)
                 
-                # 使用ASRMetrics计算各项指标
-                metrics = ASRMetrics.calculate_detailed_metrics(ref_text, asr_text)
+                # 使用ASRMetrics计算各项指标，传入语气词过滤设置
+                metrics = ASRMetrics.calculate_detailed_metrics(ref_text, asr_text, filter_fillers)
                 
                 # 获取结果
                 accuracy = metrics['accuracy']
@@ -216,7 +302,8 @@ class ASRComparisonTool:
                     "asr_chars": asr_chars,
                     "ref_chars": ref_chars,
                     "accuracy": accuracy,
-                    "details": metrics  # 保存详细指标供后续使用
+                    "details": metrics,  # 保存详细指标供后续使用
+                    "filter_fillers": filter_fillers  # 记录是否应用了语气词过滤
                 }
                 
                 self.results.append(result)
@@ -227,7 +314,8 @@ class ASRComparisonTool:
                     result["ref_file"],
                     result["asr_chars"],
                     result["ref_chars"],
-                    f"{result['accuracy']:.4f}"
+                    f"{result['accuracy']:.4f}",
+                    "是" if filter_fillers else "否"
                 ))
                 
             except Exception as e:
@@ -292,17 +380,22 @@ class ASRComparisonTool:
             if file_path.endswith('.csv'):
                 # 导出为CSV格式
                 df = pd.DataFrame(self.results)
-                # 只保留基本字段
-                df = df[['asr_file', 'ref_file', 'asr_chars', 'ref_chars', 'accuracy']]
+                # 只保留基本字段和过滤状态
+                df = df[['asr_file', 'ref_file', 'asr_chars', 'ref_chars', 'accuracy', 'filter_fillers']]
+                # 将过滤状态标记为更易读的文本
+                df['filter_fillers'] = df['filter_fillers'].apply(lambda x: "是" if x else "否")
+                # 重命名列名
+                df.columns = ['ASR文件', '标注文件', 'ASR字数', '标注字数', '字准确率', '是否过滤语气词']
                 df.to_csv(file_path, index=False, encoding='utf-8')
             else:
                 # 导出为TXT格式
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write("原始文件\t标注文件\tASR字数\t标注字数\t字准确率\n")
+                    f.write("原始文件\t标注文件\tASR字数\t标注字数\t字准确率\t是否过滤语气词\n")
                     for result in self.results:
+                        filter_status = "是" if result.get('filter_fillers', False) else "否"
                         f.write(f"{result['asr_file']}\t{result['ref_file']}\t"
                                 f"{result['asr_chars']}\t{result['ref_chars']}\t"
-                                f"{result['accuracy']:.4f}\n")
+                                f"{result['accuracy']:.4f}\t{filter_status}\n")
             
             messagebox.showinfo("成功", f"结果已导出到 {file_path}")
         
