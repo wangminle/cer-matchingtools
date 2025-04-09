@@ -44,7 +44,7 @@ def read_file_with_multiple_encodings(file_path):
         error_msg += f"- {encoding}: {error}\n"
     raise Exception(error_msg)
 
-def calculate_accuracy(ref_file_path, asr_file_path, show_details=False):
+def calculate_accuracy(ref_file_path, asr_file_path, show_details=False, filter_fillers=False):
     """
     读取文件并计算字准确率
     
@@ -52,6 +52,7 @@ def calculate_accuracy(ref_file_path, asr_file_path, show_details=False):
         ref_file_path (str): 参考文本文件路径
         asr_file_path (str): ASR结果文件路径
         show_details (bool): 是否显示详细的错误信息
+        filter_fillers (bool): 是否过滤语气词
         
     Returns:
         dict: 包含各种评估指标的字典
@@ -62,12 +63,12 @@ def calculate_accuracy(ref_file_path, asr_file_path, show_details=False):
         asr_text = read_file_with_multiple_encodings(asr_file_path)
 
         # 使用 ASRMetrics 计算指标
-        metrics = ASRMetrics.calculate_detailed_metrics(ref_text, asr_text)
+        metrics = ASRMetrics.calculate_detailed_metrics(ref_text, asr_text, filter_fillers)
         
         # 如果需要显示详细信息
         if show_details:
             # 获取错误高亮的文本
-            ref_highlight, asr_highlight = ASRMetrics.highlight_errors(ref_text, asr_text)
+            ref_highlight, asr_highlight = ASRMetrics.highlight_errors(ref_text, asr_text, filter_fillers)
             metrics['ref_highlight'] = ref_highlight
             metrics['asr_highlight'] = asr_highlight
             
@@ -96,12 +97,14 @@ def main():
     parser.add_argument("--asr", required=True, help="ASR识别结果文件路径")
     parser.add_argument("--details", action="store_true", help="显示详细的错误分析")
     parser.add_argument("--no-jieba", action="store_true", help="不使用jieba分词进行预处理")
+    parser.add_argument("--filter-fillers", action="store_true", help="过滤语气词（如'嗯'、'啊'、'呢'等）")
     args = parser.parse_args()
 
     # 获取文件路径
     ref_file = args.ref
     asr_file = args.asr
     show_details = args.details
+    filter_fillers = args.filter_fillers
 
     # 打印文件路径
     print(f"参考文件路径: {ref_file}")
@@ -113,9 +116,13 @@ def main():
         # 这里可以添加代码来禁用jieba，但由于我们的实现不允许直接在这里修改ASRMetrics的行为
         # 所以这里只是一个提示，实际上jieba处理仍然会被使用
         print("(此选项在当前版本中不生效，jieba分词仍将被使用)")
+    
+    # 如果用户选择过滤语气词
+    if filter_fillers:
+        print("注意: 启用语气词过滤功能，'嗯'、'啊'、'呢'等语气词将不计入CER计算")
 
     # 调用calculate_accuracy函数
-    result = calculate_accuracy(ref_file, asr_file, show_details)
+    result = calculate_accuracy(ref_file, asr_file, show_details, filter_fillers)
 
     # 如果计算成功，输出总结信息
     if result:
