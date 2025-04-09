@@ -27,38 +27,6 @@ class ASRMetrics:
         return "".join(words)
     
     @staticmethod
-    def filter_filler_words(text):
-        """
-        过滤中文语气词，如"嗯"、"啊"、"呢"等
-        
-        Args:
-            text (str): 输入中文文本
-            
-        Returns:
-            str: 过滤掉语气词后的文本
-        """
-        # 定义常见的语气词列表
-        filler_words = ["嗯", "啊", "呢", "吧", "哦", "呀", "啦", "喔", 
-                        "诶", "唉", "噢", "喂", "呐", "呵", "咯", "咦", "嘿"]
-        
-        # 使用jieba词性标注
-        words_pos = jieba.posseg.cut(text)
-        
-        # 过滤语气词
-        filtered_words = []
-        for word, flag in words_pos:
-            # 检查是否为语气词
-            if word in filler_words:
-                continue
-            # 检查词性是否为语气词（y）
-            if flag == 'y':
-                continue
-            filtered_words.append(word)
-        
-        # 重新组合文本
-        return "".join(filtered_words)
-    
-    @staticmethod
     def normalize_chinese_text(text):
         """
         针对中文特性的标准化处理
@@ -102,13 +70,12 @@ class ASRMetrics:
         return positions
     
     @staticmethod
-    def preprocess_text(text, filter_fillers=False):
+    def preprocess_text(text):
         """
         预处理文本：移除标点符号、转换为小写、移除多余空格等
         
         Args:
             text (str): 输入文本
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             str: 预处理后的文本
@@ -124,10 +91,6 @@ class ASRMetrics:
         # 应用预处理
         processed_text = transformation(text)
         
-        # 如果需要过滤语气词
-        if filter_fillers:
-            processed_text = ASRMetrics.filter_filler_words(processed_text)
-        
         # 对于中文，先进行jieba分词预处理
         processed_text = ASRMetrics.preprocess_chinese_text(processed_text)
         
@@ -137,21 +100,20 @@ class ASRMetrics:
         return processed_text
     
     @staticmethod
-    def calculate_cer(reference, hypothesis, filter_fillers=False):
+    def calculate_cer(reference, hypothesis):
         """
         计算字符错误率 (Character Error Rate)
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             float: 字符错误率
         """
         # 预处理文本
-        ref_processed = ASRMetrics.preprocess_text(reference, filter_fillers)
-        hyp_processed = ASRMetrics.preprocess_text(hypothesis, filter_fillers)
+        ref_processed = ASRMetrics.preprocess_text(reference)
+        hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
         # 获取字符位置信息
         ref_positions = ASRMetrics.get_character_positions(ref_processed)
@@ -180,21 +142,20 @@ class ASRMetrics:
         return cer
     
     @staticmethod
-    def calculate_wer(reference, hypothesis, filter_fillers=False):
+    def calculate_wer(reference, hypothesis):
         """
         计算词错误率 (Word Error Rate)
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             float: 词错误率
         """
         # 预处理文本
-        ref_processed = ASRMetrics.preprocess_text(reference, filter_fillers)
-        hyp_processed = ASRMetrics.preprocess_text(hypothesis, filter_fillers)
+        ref_processed = ASRMetrics.preprocess_text(reference)
+        hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
         # 对于中文文本，每个字符视为一个"词"
         # 先将字符串转为列表，确保每个元素都是单个字符
@@ -237,37 +198,35 @@ class ASRMetrics:
         return s, d, i
     
     @staticmethod
-    def calculate_accuracy(reference, hypothesis, filter_fillers=False):
+    def calculate_accuracy(reference, hypothesis):
         """
         计算准确率 (1 - CER)
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             float: 准确率
         """
-        cer = ASRMetrics.calculate_cer(reference, hypothesis, filter_fillers)
+        cer = ASRMetrics.calculate_cer(reference, hypothesis)
         return 1.0 - cer
     
     @staticmethod
-    def calculate_detailed_metrics(reference, hypothesis, filter_fillers=False):
+    def calculate_detailed_metrics(reference, hypothesis):
         """
         计算详细的错误指标，包括插入、删除、替换错误
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             dict: 包含各种错误指标的字典
         """
         # 预处理文本
-        ref_processed = ASRMetrics.preprocess_text(reference, filter_fillers)
-        hyp_processed = ASRMetrics.preprocess_text(hypothesis, filter_fillers)
+        ref_processed = ASRMetrics.preprocess_text(reference)
+        hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
         # 获取字符位置信息
         ref_positions = ASRMetrics.get_character_positions(ref_processed)
@@ -313,21 +272,20 @@ class ASRMetrics:
         }
     
     @staticmethod
-    def show_differences(reference, hypothesis, filter_fillers=False):
+    def show_differences(reference, hypothesis):
         """
         显示两个文本之间的差异
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             str: 格式化的差异信息
         """
         # 预处理文本
-        ref_processed = ASRMetrics.preprocess_text(reference, filter_fillers)
-        hyp_processed = ASRMetrics.preprocess_text(hypothesis, filter_fillers)
+        ref_processed = ASRMetrics.preprocess_text(reference)
+        hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
         # 使用difflib计算差异
         d = difflib.Differ()
@@ -336,21 +294,20 @@ class ASRMetrics:
         return ''.join(diff)
     
     @staticmethod
-    def highlight_errors(reference, hypothesis, filter_fillers=False):
+    def highlight_errors(reference, hypothesis):
         """
         高亮显示错误部分
         
         Args:
             reference (str): 参考文本（标准文本）
             hypothesis (str): 假设文本（ASR生成文本）
-            filter_fillers (bool): 是否过滤语气词
             
         Returns:
             tuple: (参考文本高亮版, 假设文本高亮版)
         """
         # 预处理文本
-        ref_processed = ASRMetrics.preprocess_text(reference, filter_fillers)
-        hyp_processed = ASRMetrics.preprocess_text(hypothesis, filter_fillers)
+        ref_processed = ASRMetrics.preprocess_text(reference)
+        hyp_processed = ASRMetrics.preprocess_text(hypothesis)
         
         # 使用difflib的SequenceMatcher找出匹配和不匹配的部分
         matcher = difflib.SequenceMatcher(None, ref_processed, hyp_processed)

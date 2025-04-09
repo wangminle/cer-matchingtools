@@ -15,7 +15,7 @@
 1.  **`top_frame` (上半部分框架)**
     *   **类型:** `ttk.Frame`
     *   **父控件:** `root`
-    *   **布局:** `pack(fill=tk.BOTH, expand=False, padx=10, pady=5)` (填充可用空间，不随窗口扩展，内外边距)
+    *   **布局:** `pack(fill=tk.BOTH, expand=True, padx=10, pady=5)` (填充整个可用空间，随窗口扩展，内外边距)
 2.  **`bottom_frame` (下半部分框架)**
     *   **类型:** `ttk.Frame`
     *   **父控件:** `root`
@@ -51,7 +51,7 @@
     *   **类型:** `tk.Canvas`
     *   **父控件:** `asr_canvas_frame`
     *   **背景色:** "white"
-    *   **高度:** 160
+    *   **高度:** 150
     *   **布局:** `pack(fill=tk.BOTH, expand=True)`
     *   **事件绑定:**
         *   `<ButtonPress-1>`: `self.on_press`
@@ -71,41 +71,19 @@
     *   **类型:** `tk.Canvas`
     *   **父控件:** `ref_canvas_frame`
     *   **背景色:** "white"
-    *   **高度:** 160
+    *   **高度:** 150
     *   **布局:** `pack(fill=tk.BOTH, expand=True)`
     *   **事件绑定:**
         *   `<ButtonPress-1>`: `self.on_press`
         *   `<B1-Motion>`: `self.on_drag`
         *   `<ButtonRelease-1>`: `self.on_release`
-10. **`control_frame` (控制框架，包含按钮和过滤选项)**
-    *   **类型:** `ttk.Frame`
-    *   **父控件:** `top_frame`
-    *   **布局:** `pack(fill=tk.X, pady=5)`
-11. **`calculate_btn` (开始统计按钮)**
+10. **`calculate_btn` (开始统计按钮)**
     *   **类型:** `ttk.Button`
-    *   **父控件:** `control_frame`
+    *   **父控件:** `top_frame` (直接位于top\_frame，在file\_area\_frame下方)
     *   **文本:** "开始统计"
     *   **命令:** `self.calculate_accuracy`
     *   **宽度:** 15
-    *   **布局:** `pack(side=tk.LEFT, padx=(350, 0))` (靠左对齐，左侧padding确保视觉居中)
-12. **`filter_frame` (语气词过滤框架)**
-    *   **类型:** `ttk.Frame`
-    *   **父控件:** `control_frame`
-    *   **布局:** `pack(side=tk.RIGHT, padx=10)` (靠右对齐)
-13. **`filter_check` (语气词过滤复选框)**
-    *   **类型:** `ttk.Checkbutton`
-    *   **父控件:** `filter_frame`
-    *   **文本:** "语气词过滤"
-    *   **变量:** `self.filter_fillers` (BooleanVar)
-    *   **布局:** `pack(side=tk.LEFT)`
-14. **语气词过滤提示标签**
-    *   **类型:** `tk.Label`
-    *   **父控件:** `filter_frame`
-    *   **文本:** "?"
-    *   **字体:** ("Arial", 9, "bold")
-    *   **颜色:** "blue"
-    *   **布局:** `pack(side=tk.LEFT, padx=3)`
-    *   **事件绑定:** `<Enter>` 显示工具提示
+    *   **布局:** `pack(pady=10)`
 
 **下半部分 (`bottom_frame`) 内的元素**
 
@@ -121,13 +99,13 @@
 3.  **`result_tree` (结果显示表格)**
     *   **类型:** `ttk.Treeview`
     *   **父控件:** `result_tree_frame`
-    *   **列:** ("原始文件", "标注文件", "ASR字数", "标注字数", "字准确率", "过滤语气词")
+    *   **列:** ("原始文件", "标注文件", "ASR字数", "标注字数", "字准确率")
     *   **显示模式:** "headings" (只显示表头，不显示索引列)
     *   **高度 (行数):** 8
     *   **布局:** `pack(fill=tk.BOTH, expand=True)`
     *   **列属性 (循环设置):**
         *   `heading(col, text=col)` (设置每列的表头文本)
-        *   `column(col, width=120, anchor="center")` (设置每列宽度120，内容居中)
+        *   `column(col, width=150, anchor="center")` (设置每列宽度150，内容居中)
 4.  **`export_btn` (导出结果按钮)**
     *   **类型:** `ttk.Button`
     *   **父控件:** `bottom_frame` (直接位于bottom\_frame，在result\_frame下方)
@@ -150,13 +128,4 @@
     *   **锚点:** "w" (西，即左对齐)
     *   **标签:** `f"file_{i}"` (与对应矩形框关联)
 
-**工具提示特性**
-
-* **工具提示窗口:**
-  * **类型:** `tk.Toplevel`
-  * **无边框:** `wm_overrideredirect(True)`
-  * **位置:** 根据鼠标位置动态计算
-  * **内容:** 语气词过滤功能说明
-  * **边界检测:** 使用30x30像素的虚拟边界框判断鼠标位置
-
-这个列表涵盖了 `src/main.py` 中定义的所有主要UI组件及其关键属性和布局信息。Canvas 内部的元素是动态生成的，用于显示文件列表，并支持拖拽排序。布局已经调整，增加了文件显示区域的高度，同时保持结果区域的紧凑性。
+这个列表涵盖了 `src/main.py` 中定义的所有主要UI组件及其关键属性和布局信息。 Canvas 内部的元素是动态生成的，用于显示文件列表，并支持拖拽排序。
