@@ -45,11 +45,15 @@ class ASRComparisonTool:
         self.file_area_frame = ttk.Frame(self.top_frame)
         self.file_area_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
+        # 创建一个固定比例的网格系统，确保左右框架宽度一致
+        self.file_area_frame.columnconfigure(0, weight=1, uniform="group1")  # 左侧列
+        self.file_area_frame.columnconfigure(1, weight=1, uniform="group1")  # 右侧列
+        
         self.left_frame = ttk.LabelFrame(self.file_area_frame, text="ASR转换结果文件")
-        self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.left_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         
         self.right_frame = ttk.LabelFrame(self.file_area_frame, text="标注文件")
-        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.right_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
         
         # ASR文件选择按钮和列表
         self.asr_btn = ttk.Button(self.left_frame, text="选择ASR文件", command=self.select_asr_files)
@@ -59,8 +63,8 @@ class ASRComparisonTool:
         self.asr_canvas_frame = ttk.Frame(self.left_frame)
         self.asr_canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 设置canvas的高度 - 减小高度以缩小中间区域
-        self.asr_canvas = tk.Canvas(self.asr_canvas_frame, bg="white", height=120)  # 原来是150，现在减少到120
+        # 设置canvas的高度和宽度
+        self.asr_canvas = tk.Canvas(self.asr_canvas_frame, bg="white", height=160, width=350)  # 设置固定宽度
         self.asr_canvas.pack(fill=tk.BOTH, expand=True)
         self.asr_canvas.bind("<ButtonPress-1>", self.on_press)
         self.asr_canvas.bind("<B1-Motion>", self.on_drag)
@@ -74,8 +78,8 @@ class ASRComparisonTool:
         self.ref_canvas_frame = ttk.Frame(self.right_frame)
         self.ref_canvas_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 设置canvas的高度 - 减小高度以缩小中间区域
-        self.ref_canvas = tk.Canvas(self.ref_canvas_frame, bg="white", height=120)  # 原来是150，现在减少到120
+        # 设置canvas的高度和宽度，确保与左侧一致
+        self.ref_canvas = tk.Canvas(self.ref_canvas_frame, bg="white", height=160, width=350)  # 设置固定宽度
         self.ref_canvas.pack(fill=tk.BOTH, expand=True)
         self.ref_canvas.bind("<ButtonPress-1>", self.on_press)
         self.ref_canvas.bind("<B1-Motion>", self.on_drag)
@@ -85,13 +89,18 @@ class ASRComparisonTool:
         self.control_frame = ttk.Frame(self.top_frame)
         self.control_frame.pack(fill=tk.X, pady=5)
         
-        # 统计按钮 - 放在中间
-        self.calculate_btn = ttk.Button(self.control_frame, text="开始统计", command=self.calculate_accuracy, width=15)
-        self.calculate_btn.pack(side=tk.LEFT, padx=(350, 0))  # 使用padx左侧增加空间，实现居中效果
+        # 创建按钮容器框架
+        self.btn_container = ttk.Frame(self.control_frame)
+        self.btn_container.pack(side=tk.TOP, fill=tk.X)
         
-        # 语气词过滤开关 - 放在右侧
+        # 统计按钮 - 居中对齐
+        self.calculate_btn = ttk.Button(self.btn_container, text="开始统计", command=self.calculate_accuracy, width=15)
+        self.calculate_btn.pack(side=tk.TOP, pady=5)
+        
+        # 语气词过滤开关 - 调整位置到右侧，并与"开始统计"按钮垂直居中对齐
         self.filter_frame = ttk.Frame(self.control_frame)
-        self.filter_frame.pack(side=tk.RIGHT, padx=10)
+        # 使用place布局，设置rely=0.5使其垂直居中，anchor=E使其靠右对齐
+        self.filter_frame.place(relx=1.0, rely=0.5, anchor=tk.E, x=-20)
         
         self.filter_check = ttk.Checkbutton(
             self.filter_frame, 
@@ -172,16 +181,20 @@ class ASRComparisonTool:
         
         # 结果展示表格，设置高度 - 增加显示行数
         columns = ("原始文件", "标注文件", "ASR字数", "标注字数", "字准确率", "过滤语气词")
-        self.result_tree = ttk.Treeview(self.result_tree_frame, columns=columns, show="headings", height=12)  # 原来是8行，现在增加到12行
+        self.result_tree = ttk.Treeview(self.result_tree_frame, columns=columns, show="headings", height=8)  # 原来是12行，现在减少到8行
         for col in columns:
             self.result_tree.heading(col, text=col)
             self.result_tree.column(col, width=120, anchor="center")
         
         self.result_tree.pack(fill=tk.BOTH, expand=True)
         
-        # 导出按钮
-        self.export_btn = ttk.Button(self.bottom_frame, text="导出结果", command=self.export_results, width=15)
-        self.export_btn.pack(pady=10)
+        # 创建导出按钮的容器框架用于居中对齐
+        self.export_frame = ttk.Frame(self.bottom_frame)
+        self.export_frame.pack(fill=tk.X, pady=10)
+        
+        # 导出按钮 - 居中对齐
+        self.export_btn = ttk.Button(self.export_frame, text="导出结果", command=self.export_results, width=15)
+        self.export_btn.pack(side=tk.TOP, pady=0)
         
         # 设置拖拽变量
         self.drag_data = {"x": 0, "y": 0, "item": None, "canvas": None}
@@ -201,9 +214,17 @@ class ASRComparisonTool:
     def update_canvas_items(self, canvas, file_list):
         canvas.delete("all")
         y_pos = 10
+        canvas_width = canvas.winfo_width()
+        
+        # 确保canvas宽度至少有最小值，避免初始化时winfo_width返回1的问题
+        if canvas_width < 10:
+            canvas_width = 350  # 使用之前设置的默认宽度
+            
         for i, file_path in enumerate(file_list):
             file_name = os.path.basename(file_path)
-            item_id = canvas.create_rectangle(10, y_pos, canvas.winfo_width()-10, y_pos+30, 
+            # 使用固定宽度创建矩形，确保两边宽度一致
+            item_width = canvas_width - 20  # 左右各留10像素边距
+            item_id = canvas.create_rectangle(10, y_pos, 10 + item_width, y_pos+30, 
                                             fill="lightblue", tags=f"file_{i}")
             canvas.create_text(20, y_pos+15, text=file_name, anchor="w", tags=f"file_{i}")
             canvas.itemconfig(item_id, tags=(f"file_{i}", file_path))
