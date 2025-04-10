@@ -1,1 +1,11 @@
+# 虚拟环境
+.venv/
+venv/
+ENV/
+env/
+
+# Python 缓存文件
 /src/__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
