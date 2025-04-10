@@ -9,3 +9,7 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+/.venv
+*.pyc
+/.venv
+*.pyc
