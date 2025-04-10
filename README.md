@@ -76,7 +76,6 @@ python check_accuracy.py --ref 参考文件路径 --asr ASR结果文件路径 [�
 
 可用选项：
 - `--details`：显示详细的错误分析，包括错误高亮和字符位置信息
-- `--no-jieba`：提示不使用jieba分词（当前版本中此选项仅作为提示）
 - `--filter-fillers`：过滤语气词（如"嗯"、"啊"、"呢"等），不将其计入CER计算
 
 例如：
