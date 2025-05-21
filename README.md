@@ -1,144 +1,143 @@
-# ASR字准确率对比工具
+# ASR Character Accuracy Comparison Tool
 
-这是一个用于批量对比ASR（自动语音识别）转写结果与标准文本之间字准确率的Python工具。
+This is a Python tool for batch comparing the character accuracy rate between ASR (Automatic Speech Recognition) transcription results and standard text.
 
-## 功能特性
+## Features
 
-- 批量导入ASR转写结果文档和标准标注文档
-- 通过拖拽方式建立ASR结果和标注文件的一一对应关系
-- 自动计算字准确率（Character Accuracy Rate）
-- 统计文档字数信息
-- 支持导出统计结果为TXT或CSV格式
-- 支持多种文本编码（UTF-8、GBK、GB2312、GB18030、ANSI）
-- 提供800x600的默认窗口大小，支持窗口最大化
-- **新增：基于jieba分词的中文文本预处理**
-- **新增：精确的中文字符位置定位和错误分析**
-- **新增：中文文本标准化处理（全/半角转换、数字统一等）**
-- **新增：语气词过滤功能，可选择是否将"嗯"、"啊"等语气词计入CER计算**
-- **新增：优化的用户界面布局，更大的结果展示区域**
+- Batch import ASR transcription result documents and standard annotation documents
+- Establish one-to-one correspondence between ASR results and annotation files via drag-and-drop
+- Automatically calculate Character Accuracy Rate
+- Count document character information
+- Support exporting statistical results in TXT or CSV format
+- Support multiple text encodings (UTF-8, GBK, GB2312, GB18030, ANSI)
+- Provide a default window size of 800x600, supports window maximization
+- **New: Chinese text preprocessing based on jieba word segmentation**
+- **New: Precise Chinese character position localization and error analysis**
+- **New: Chinese text normalization (full/half-width conversion, number unification, etc.)**
+- **New: Filler word filtering function, option to include filler words like "嗯", "啊" in CER calculation**
+- **New: Optimized user interface layout, larger result display area**
 
-## 安装依赖
+## Install Dependencies
 
-使用pip安装依赖：
+Install dependencies using pip:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-主要依赖：
-- jiwer>=2.5.0：用于计算字/词错误率
-- pandas>=1.3.5：用于数据处理和导出
-- tk>=0.1.0：提供GUI界面支持
-- **jieba>=0.42.1：中文分词库**
-- **python-Levenshtein>=0.12.2：计算编辑距离**
+Main dependencies:
+- jiwer>=2.5.0: Used to calculate character/word error rate
+- pandas>=1.3.5: Used for data processing and export
+- tk>=0.1.0: Provides GUI interface support
+- **jieba>=0.42.1: Chinese word segmentation library**
+- **python-Levenshtein>=0.12.2: Calculate edit distance**
 
-## 使用方法
+## Usage
 
-本工具提供三种不同的使用方式：
+This tool offers three different ways to use it:
 
-### 1. GUI界面方式（推荐）
+### 1. GUI Mode (Recommended)
 
 ```bash
 python src/main.py
 ```
 
-使用步骤：
-1. 在界面左侧点击"选择ASR文件"按钮，批量导入ASR转写结果文件
-2. 在界面右侧点击"选择标注文件"按钮，批量导入标准标注文件
-3. 如有需要，通过拖拽调整文件顺序建立对应关系
-4. 根据需要勾选"语气词过滤"选项（鼠标悬停在"?"上可查看详细说明）
-5. 点击"开始统计"按钮，计算字准确率
-6. 查看结果表格，包含文件名、字数、准确率和过滤状态信息
-7. 点击"导出结果"按钮，将结果保存为TXT或CSV文件
+Steps:
+1. Click the "Select ASR Files" button on the left side of the interface to batch import ASR transcription result files.
+2. Click the "Select Annotation Files" button on the right side of the interface to batch import standard annotation files.
+3. If necessary, adjust the file order by drag-and-drop to establish correspondence.
+4. Check the "Filter Filler Words" option as needed (hover over "?" for detailed explanation).
+5. Click the "Start Calculation" button to calculate character accuracy.
+6. View the results table, including file name, character count, accuracy, and filter status information.
+7. Click the "Export Results" button to save the results as a TXT or CSV file.
 
-### 2. 示例测试方式
+### 2. Example Test Mode
 
-运行内置示例，查看字准确率计算功能：
+Run the built-in example to see the character accuracy calculation function:
 
 ```bash
 python example_test.py
 ```
 
-这会展示：
-- 中文文本的字准确率计算示例
-- 英文文本的字准确率计算示例
-- 从文件读取文本并计算字准确率的示例
-- **新增：复杂中文文本的字准确率计算示例**
-- **新增：语气词过滤功能演示**
+This will demonstrate:
+- Character accuracy calculation example for Chinese text
+- Character accuracy calculation example for English text
+- Example of reading text from files and calculating character accuracy
+- **New: Character accuracy calculation example for complex Chinese text**
 
-### 3. 命令行工具方式
+### 3. Command-Line Tool Mode
 
-直接比较两个指定的文件：
+Directly compare two specified files:
 
 ```bash
-python check_accuracy.py --ref 参考文件路径 --asr ASR结果文件路径 [选项]
+python check_accuracy.py --ref <reference_file_path> --asr <asr_result_file_path> [options]
 ```
 
-可用选项：
-- `--details`：显示详细的错误分析，包括错误高亮和字符位置信息
-- `--filter-fillers`：过滤语气词（如"嗯"、"啊"、"呢"等），不将其计入CER计算
+Available options:
+- `--details`: Display detailed error analysis, including error highlighting and character position information.
+- `--filter-fillers`: Filter filler words (e.g., "嗯", "啊", "呢"), not including them in CER calculation.
 
-例如：
+Example:
 ```bash
-# 基本用法
+# Basic usage
 python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
 
-# 显示详细错误分析
+# Display detailed error analysis
 python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt --details
 
-# 过滤语气词计算CER
+# Filter filler words for CER calculation
 python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt --filter-fillers
 ```
 
-命令行工具会显示详细的评估结果，包括字准确率、错误率、替换/删除/插入错误数等指标。
+The command-line tool will display detailed evaluation results, including character accuracy, error rate, substitution/deletion/insertion error counts, etc.
 
-## 字准确率计算方法
+## Character Accuracy Calculation Method
 
-工具使用的是字符错误率（CER）的补集，计算公式为：
+The tool uses the complement of Character Error Rate (CER), calculated as:
 
 ```
-字准确率 = 1 - CER = 1 - (S + D + I) / N
+Character Accuracy = 1 - CER = 1 - (S + D + I) / N
 ```
 
-其中：
-- S：替换错误数
-- D：删除错误数
-- I：插入错误数
-- N：标准文本中的字符总数
+Where:
+- S: Number of substitution errors
+- D: Number of deletion errors
+- I: Number of insertion errors
+- N: Total number of characters in the standard text
 
-**改进的中文字准确率计算流程：**
+**Improved Chinese Character Accuracy Calculation Process:**
 
-1. **分词预处理**：使用jieba对中文文本进行分词，提高对中文语义的理解
-2. **文本标准化**：处理全/半角字符、统一数字表达、移除标点符号等
-3. **语气词过滤（可选）**：过滤"嗯"、"啊"、"呢"等语气词，使CER更准确反映实际语义
-4. **字符位置定位**：使用jieba.tokenize获取每个字符在原文中的精确位置
-5. **编辑距离计算**：使用Levenshtein距离算法计算字符级别的编辑距离
-6. **错误分析与高亮**：识别替换、删除、插入错误，并提供可视化的错误高亮
+1.  **Word Segmentation Preprocessing**: Use jieba for Chinese word segmentation to improve understanding of Chinese semantics.
+2.  **Text Normalization**: Process full/half-width characters, unify numerical expressions, remove punctuation, etc.
+3.  **Filler Word Filtering (Optional)**: Filter filler words like "嗯", "啊", "呢" to make CER more accurately reflect actual semantic content.
+4.  **Character Position Localization**: Use `jieba.tokenize` to get the precise position of each character in the original text.
+5.  **Edit Distance Calculation**: Use the Levenshtein distance algorithm to calculate character-level edit distance.
+6.  **Error Analysis and Highlighting**: Identify substitution, deletion, and insertion errors, and provide visual error highlighting.
 
-## 界面布局优化
+## UI Layout Optimization
 
-最新版本对界面布局进行了优化：
+The latest version has optimized the UI layout:
 
-1. **紧凑的文件选择区域**：减小了文件列表显示区域的高度，使上半部分更紧凑
-2. **增大的结果展示区域**：下方的结果展示表格行数从8行增加到12行，以展示更多结果
-3. **改进的控制区域**：将"开始统计"按钮和"语气词过滤"勾选框放在同一行，布局更合理
-4. **语气词过滤功能提示**：添加了悬停提示，方便用户了解功能作用
-5. **智能的布局分配**：上部分区域固定大小，下部分结果区域可随窗口调整自动扩展
+1.  **Compact File Selection Area**: Reduced the height of the file list display area, making the upper part more compact.
+2.  **Enlarged Result Display Area**: The result display table below has increased from 8 rows to 12 rows to show more results.
+3.  **Improved Control Area**: The "Start Calculation" button and "Filter Filler Words" checkbox are placed on the same line for a more reasonable layout.
+4.  **Filler Word Filtering Function Hint**: Added a hover hint for users to understand the function's purpose.
+5.  **Intelligent Layout Allocation**: The upper area has a fixed size, and the lower result area can automatically expand with window adjustment.
 
-## 项目结构
+## Project Structure
 
-- `src/main.py`：主程序，包含GUI界面和主要功能
-- `src/utils.py`：工具类，包含字准确率计算相关函数
-- `example_test.py`：示例测试脚本
-- `check_accuracy.py`：命令行比较工具
-- `requirements.txt`：项目依赖列表
-- `docs/UI-definition.md`：用户界面定义文档
+- `src/main.py`: Main program, including GUI interface and main functions.
+- `src/utils.py`: Utility class, including functions related to character accuracy calculation.
+- `example_test.py`: Example test script.
+- `check_accuracy.py`: Command-line comparison tool.
+- `requirements.txt`: Project dependency list.
+- `docs/UI-definition.md`: User interface definition document.
 
-## 注意事项
+## Notes
 
-- 支持的文件格式：纯文本文件(.txt)
-- 文件编码：支持UTF-8、GBK、GB2312、GB18030及系统默认编码（ANSI）
-- 字准确率计算是基于字符级别的，特别适合中文等没有明确词边界的语言
-- **jieba分词初次加载时可能需要几秒钟时间构建词典缓存**
-- **对于专业领域文本，可考虑通过jieba.load_userdict()添加自定义词典**
-- **语气词过滤功能默认识别常见的20种中文语气词，也会基于jieba的词性标注识别"语气词(y)"** 
+- Supported file formats: Plain text files (.txt)
+- File encoding: Supports UTF-8, GBK, GB2312, GB18030, and system default encoding (ANSI).
+- Character accuracy calculation is character-level, especially suitable for languages like Chinese without clear word boundaries.
+- **Jieba word segmentation may take a few seconds to build a dictionary cache 처음 로드될 때.**
+- **For domain-specific text, consider adding a custom dictionary via `jieba.load_userdict()`**
+- **The filler word filtering function recognizes 20 common Chinese filler words by default and also identifies "filler words (y)" based on jieba's part-of-speech tagging.** 
