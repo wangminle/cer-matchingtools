@@ -1,143 +1,232 @@
 # ASR Character Accuracy Comparison Tool
 
-This is a Python tool for batch comparing the character accuracy rate between ASR (Automatic Speech Recognition) transcription results and standard text.
+A Python-based tool for batch comparing character accuracy rates between ASR (Automatic Speech Recognition) transcription results and standard text, with multi-tokenizer support.
 
-## Features
+## ✨ Core Features
 
+### 🎯 Multi-Tokenizer Support
+- **Jieba Tokenizer**: Default choice, high-speed segmentation, suitable for daily use
+- **THULAC Tokenizer**: Developed by Tsinghua University, high-precision segmentation, suitable for professional analysis
+- **HanLP Tokenizer**: Deep learning model, highest precision, suitable for research environments
+
+### 🚀 Smart Features
+- ✅ **Automatic Tokenizer Detection**: Detects installed tokenizers at startup
+- ✅ **Smart Fallback Mechanism**: Automatically fallback to jieba when tokenizers are unavailable
+- ✅ **Real-time Status Display**: GUI shows tokenizer status and version information
+- ✅ **Dependency-free Demo**: Complete architecture demonstration without additional dependencies
+
+### 📊 Advanced Functions
 - Batch import ASR transcription result documents and standard annotation documents
-- Establish one-to-one correspondence between ASR results and annotation files via drag-and-drop
+- Drag-and-drop to establish one-to-one correspondence between ASR results and annotation files
 - Automatically calculate Character Accuracy Rate
 - Count document character information
 - Support exporting statistical results in TXT or CSV format
 - Support multiple text encodings (UTF-8, GBK, GB2312, GB18030, ANSI)
-- Provide a default window size of 800x600, supports window maximization
-- **New: Chinese text preprocessing based on jieba word segmentation**
-- **New: Precise Chinese character position localization and error analysis**
-- **New: Chinese text normalization (full/half-width conversion, number unification, etc.)**
-- **New: Filler word filtering function, option to include filler words like "嗯", "啊" in CER calculation**
-- **New: Optimized user interface layout, larger result display area**
+- **Filler word filtering**: Optional filtering of filler words like "嗯", "啊"
+- **Optimized user interface**: Larger result display area, more user-friendly experience
 
-## Install Dependencies
+## 📦 Installation & Dependencies
 
-Install dependencies using pip:
-
+### Quick Experience (Recommended)
 ```bash
-pip install -r requirements.txt
+# Experience complete architecture without any dependencies
+cd cer-matchingtools
+python3 tests/test_architecture_demo.py
 ```
 
-Main dependencies:
-- jiwer>=2.5.0: Used to calculate character/word error rate
-- pandas>=1.3.5: Used for data processing and export
-- tk>=0.1.0: Provides GUI interface support
-- **jieba>=0.42.1: Chinese word segmentation library**
-- **python-Levenshtein>=0.12.2: Calculate edit distance**
+### Full Installation
+```bash
+# Install core dependencies
+pip install -r requirements.txt
 
-## Usage
+# Optional: Install other tokenizers
+pip install thulac    # Install THULAC tokenizer
+pip install hanlp     # Install HanLP tokenizer (large, first use requires model download)
+```
 
-This tool offers three different ways to use it:
+#### Dependency Description
+**Core Dependencies (Required):**
+- `jieba>=0.42.1`: Default Chinese tokenizer
+- `jiwer>=2.5.0`: Text preprocessing and error rate calculation
+- `pandas>=1.3.0`: Data processing and export
+- `python-Levenshtein>=0.12.2`: Efficient edit distance calculation
+
+**Optional Dependencies:**
+- `thulac>=0.2.0`: THULAC high-precision tokenizer
+- `hanlp>=2.1.0`: HanLP deep learning tokenizer
+
+## 🎮 Usage
 
 ### 1. GUI Mode (Recommended)
 
 ```bash
-python src/main.py
+python3 src/main_with_tokenizers.py
 ```
 
-Steps:
-1. Click the "Select ASR Files" button on the left side of the interface to batch import ASR transcription result files.
-2. Click the "Select Annotation Files" button on the right side of the interface to batch import standard annotation files.
-3. If necessary, adjust the file order by drag-and-drop to establish correspondence.
-4. Check the "Filter Filler Words" option as needed (hover over "?" for detailed explanation).
-5. Click the "Start Calculation" button to calculate character accuracy.
-6. View the results table, including file name, character count, accuracy, and filter status information.
-7. Click the "Export Results" button to save the results as a TXT or CSV file.
+#### Operation Steps:
+1. **Select Tokenizer**: Choose the desired tokenizer in the top dropdown
+2. **Check Status**: Confirm tokenizer status shows green ✓
+3. **Import Files**:
+   - Left: Click "Select ASR Files" to batch import ASR transcription results
+   - Right: Click "Select Annotation Files" to batch import standard annotation files
+4. **Establish Correspondence**: Adjust file order by drag-and-drop
+5. **Configure Options**: Check "Filter Filler Words" as needed
+6. **Calculate Statistics**: Click "Start Calculation" button
+7. **View Results**: Result table shows detailed statistics
+8. **Export Data**: Click "Export Results" to save as file
 
-### 2. Example Test Mode
+#### Interface Function Description:
+- **Tokenizer Selection Area**: Select and manage tokenizers
+- **File Selection Area**: Import and manage file lists
+- **Control Area**: Statistics button and option configuration
+- **Result Display Area**: Detailed statistical result table
 
-Run the built-in example to see the character accuracy calculation function:
+### 2. Architecture Demo Mode
 
 ```bash
-python example_test.py
+python3 tests/test_architecture_demo.py
 ```
 
-This will demonstrate:
-- Character accuracy calculation example for Chinese text
-- Character accuracy calculation example for English text
-- Example of reading text from files and calculating character accuracy
-- **New: Character accuracy calculation example for complex Chinese text**
+This demo program:
+- 📚 **No external dependencies required**
+- 🔬 **Shows complete architecture design**
+- ⚡ **Quick function verification**
+- 🧪 **Suitable for development testing**
 
 ### 3. Command-Line Tool Mode
 
-Directly compare two specified files:
+Compare two specified files:
 
-```bash
-python check_accuracy.py --ref <reference_file_path> --asr <asr_result_file_path> [options]
-```
-
-Available options:
-- `--details`: Display detailed error analysis, including error highlighting and character position information.
-- `--filter-fillers`: Filter filler words (e.g., "嗯", "啊", "呢"), not including them in CER calculation.
-
-Example:
 ```bash
 # Basic usage
-python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt
+python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt
 
-# Display detailed error analysis
-python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt --details
+# Show detailed error analysis
+python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt --details
 
-# Filter filler words for CER calculation
-python check_accuracy.py --ref ref_text1.txt --asr asr_result1.txt --filter-fillers
+# Filter filler words
+python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt --filter-fillers
 ```
 
-The command-line tool will display detailed evaluation results, including character accuracy, error rate, substitution/deletion/insertion error counts, etc.
+## 🎯 Tokenizer Selection Guide
 
-## Character Accuracy Calculation Method
+### Jieba Tokenizer
+- **Performance**: ⚡ High Speed
+- **Accuracy**: ⭐⭐⭐ Medium
+- **Use Cases**: Daily batch processing, quick verification
+- **Advantages**: Fast speed, low resource usage, good compatibility
 
-The tool uses the complement of Character Error Rate (CER), calculated as:
+### THULAC Tokenizer
+- **Performance**: ⚡⚡ Medium Speed
+- **Accuracy**: ⭐⭐⭐⭐ High Precision
+- **Use Cases**: Professional analysis, high quality requirements
+- **Advantages**: Developed by Tsinghua University, academic standards, accurate POS tagging
+
+### HanLP Tokenizer
+- **Performance**: ⚡ Slower (first use requires model download)
+- **Accuracy**: ⭐⭐⭐⭐⭐ Highest Precision
+- **Use Cases**: Research environments, highest precision requirements
+- **Advantages**: Deep learning models, multi-task support, continuous updates
+
+## 📐 Character Accuracy Calculation Method
+
+Uses the complement of Character Error Rate (CER):
 
 ```
 Character Accuracy = 1 - CER = 1 - (S + D + I) / N
 ```
 
 Where:
-- S: Number of substitution errors
-- D: Number of deletion errors
-- I: Number of insertion errors
-- N: Total number of characters in the standard text
+- **S**: Number of substitution errors
+- **D**: Number of deletion errors
+- **I**: Number of insertion errors
+- **N**: Total number of characters in the standard text
 
-**Improved Chinese Character Accuracy Calculation Process:**
+### 🔧 Improved Calculation Process
 
-1.  **Word Segmentation Preprocessing**: Use jieba for Chinese word segmentation to improve understanding of Chinese semantics.
-2.  **Text Normalization**: Process full/half-width characters, unify numerical expressions, remove punctuation, etc.
-3.  **Filler Word Filtering (Optional)**: Filter filler words like "嗯", "啊", "呢" to make CER more accurately reflect actual semantic content.
-4.  **Character Position Localization**: Use `jieba.tokenize` to get the precise position of each character in the original text.
-5.  **Edit Distance Calculation**: Use the Levenshtein distance algorithm to calculate character-level edit distance.
-6.  **Error Analysis and Highlighting**: Identify substitution, deletion, and insertion errors, and provide visual error highlighting.
+1. **Tokenization Preprocessing**: Use selected tokenizer for text segmentation
+2. **Text Normalization**: Process full/half-width characters, unify numerical expressions
+3. **Filler Word Filtering (Optional)**: Filter filler words like "嗯", "啊", "呢"
+4. **Character Position Localization**: Precisely locate each character's position in original text
+5. **Edit Distance Calculation**: Use Levenshtein distance algorithm
+6. **Error Analysis**: Identify substitution, deletion, insertion errors with visualization
 
-## UI Layout Optimization
+## 📁 Project Structure
 
-The latest version has optimized the UI layout:
+```
+cer-matchingtools/
+├── src/
+│   ├── text_tokenizers/           # 🧠 Core tokenizer module
+│   │   ├── __init__.py            # Module export interface
+│   │   └── tokenizers/            # Tokenizer implementations
+│   │       ├── base.py            # Abstract base class
+│   │       ├── factory.py         # Factory class
+│   │       ├── jieba_tokenizer.py # Jieba implementation
+│   │       ├── thulac_tokenizer.py# THULAC implementation
+│   │       └── hanlp_tokenizer.py # HanLP implementation
+│   ├── main_with_tokenizers.py    # 🎨 New GUI interface
+│   ├── asr_metrics_refactored.py  # 📊 Refactored calculation engine
+│   └── v0.1.0/                    # 📦 Original version backup
+├── tests/
+│   └── test_architecture_demo.py  # 🔬 Architecture demo program
+├── docs/                          # 📚 Detailed documentation
+├── demo/                          # 🧪 Example files
+├── requirements.txt               # 📦 Dependency management
+└── QUICK_START.md                 # 🚀 Quick start guide
+```
 
-1.  **Compact File Selection Area**: Reduced the height of the file list display area, making the upper part more compact.
-2.  **Enlarged Result Display Area**: The result display table below has increased from 8 rows to 12 rows to show more results.
-3.  **Improved Control Area**: The "Start Calculation" button and "Filter Filler Words" checkbox are placed on the same line for a more reasonable layout.
-4.  **Filler Word Filtering Function Hint**: Added a hover hint for users to understand the function's purpose.
-5.  **Intelligent Layout Allocation**: The upper area has a fixed size, and the lower result area can automatically expand with window adjustment.
+## 🔧 Troubleshooting
 
-## Project Structure
+### Common Issues
 
-- `src/main.py`: Main program, including GUI interface and main functions.
-- `src/utils.py`: Utility class, including functions related to character accuracy calculation.
-- `example_test.py`: Example test script.
-- `check_accuracy.py`: Command-line comparison tool.
-- `requirements.txt`: Project dependency list.
-- `docs/UI-definition.md`: User interface definition document.
+**Q: How to handle unavailable tokenizers?**
+A: Check if corresponding dependencies are installed:
+```bash
+pip install thulac    # Install THULAC
+pip install hanlp     # Install HanLP
+```
 
-## Notes
+**Q: Why is HanLP slow on first use?**
+A: HanLP needs to download deep learning models, first use requires patience. Recommend using in good network environment.
 
-- Supported file formats: Plain text files (.txt)
-- File encoding: Supports UTF-8, GBK, GB2312, GB18030, and system default encoding (ANSI).
-- Character accuracy calculation is character-level, especially suitable for languages like Chinese without clear word boundaries.
-- **Jieba word segmentation may take a few seconds to build a dictionary cache 처음 로드될 때.**
-- **For domain-specific text, consider adding a custom dictionary via `jieba.load_userdict()`**
-- **The filler word filtering function recognizes 20 common Chinese filler words by default and also identifies "filler words (y)" based on jieba's part-of-speech tagging.** 
+**Q: How to verify architecture design?**
+A: Run the architecture demo program:
+```bash
+python3 tests/test_architecture_demo.py
+```
+
+**Q: How to choose the right tokenizer?**
+A: Refer to tokenizer selection guide, choose based on speed and accuracy needs:
+- For speed: Choose Jieba
+- For balance: Choose THULAC
+- For precision: Choose HanLP
+
+## 🆕 Version Features
+
+### Current Version Highlights
+- 🎯 **Multi-tokenizer Architecture**: Support for three mainstream Chinese tokenizers
+- 🚀 **Smart Switching**: Automatic detection and graceful fallback
+- 🎨 **Optimized Interface**: More user-friendly experience
+- 🔬 **Architecture Demo**: Complete feature demonstration without dependencies
+- 📊 **Detailed Statistics**: Enhanced result display and analysis
+
+### Backward Compatibility
+- ✅ Maintain original API interfaces unchanged
+- ✅ Default to jieba tokenizer
+- ✅ Support original file formats and encodings
+
+## 📞 Technical Support
+
+For issues, please check:
+- `QUICK_START.md` - Quick start guide
+- `docs/project_development_summary.md` - Detailed development summary
+- `docs/test_cases.md` - Test case documentation
+- `tests/test_architecture_demo.py` - Architecture demo code
+
+## 📄 License
+
+This project is released under an open source license, see `LICENSE` file for details.
+
+---
+
+🎉 **Experience multi-tokenizer switching now to improve ASR character accuracy analysis precision and efficiency!** 
