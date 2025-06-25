@@ -5,12 +5,16 @@ ENV/
 env/
 
 # Python 缓存文件
-/src/__pycache__
 __pycache__/
 *.py[cod]
 *$py.class
-/.venv
 *.pyc
-/.venv
-*.pyc
+
+# 系统文件
 .DS_Store
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
