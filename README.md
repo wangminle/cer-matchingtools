@@ -27,14 +27,7 @@ A Python-based tool for batch comparing character accuracy rates between ASR (Au
 
 ## 📦 Installation & Dependencies
 
-### Quick Experience (Recommended)
-```bash
-# Experience complete architecture without any dependencies
-cd cer-matchingtools
-python3 tests/test_architecture_demo.py
-```
-
-### Full Installation
+### Installation
 ```bash
 # Install core dependencies
 pip install -r requirements.txt
@@ -81,32 +74,13 @@ python3 src/main_with_tokenizers.py
 - **Control Area**: Statistics button and option configuration
 - **Result Display Area**: Detailed statistical result table
 
-### 2. Architecture Demo Mode
+### 2. Batch Processing Mode
 
+For batch file processing, run the GUI interface directly:
 ```bash
-python3 tests/test_architecture_demo.py
+python3 src/main_with_tokenizers.py
 ```
-
-This demo program:
-- 📚 **No external dependencies required**
-- 🔬 **Shows complete architecture design**
-- ⚡ **Quick function verification**
-- 🧪 **Suitable for development testing**
-
-### 3. Command-Line Tool Mode
-
-Compare two specified files:
-
-```bash
-# Basic usage
-python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt
-
-# Show detailed error analysis
-python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt --details
-
-# Filter filler words
-python3 src/check_accuracy.py --ref reference_file.txt --asr asr_result.txt --filter-fillers
-```
+Then follow the interface operation steps for batch import and processing.
 
 ## 🎯 Tokenizer Selection Guide
 
@@ -164,15 +138,12 @@ cer-matchingtools/
 │   │       ├── jieba_tokenizer.py # Jieba implementation
 │   │       ├── thulac_tokenizer.py# THULAC implementation
 │   │       └── hanlp_tokenizer.py # HanLP implementation
-│   ├── main_with_tokenizers.py    # 🎨 New GUI interface
-│   ├── asr_metrics_refactored.py  # 📊 Refactored calculation engine
-│   └── v0.1.0/                    # 📦 Original version backup
-├── tests/
-│   └── test_architecture_demo.py  # 🔬 Architecture demo program
-├── docs/                          # 📚 Detailed documentation
+│   ├── main_with_tokenizers.py    # 🎨 GUI interface main program
+│   ├── asr_metrics_refactored.py  # 📊 Calculation engine
+│   └── requirements.txt           # 📦 Dependency management
+├── docs/                          # 📚 Technical documentation
 ├── demo/                          # 🧪 Example files
-├── requirements.txt               # 📦 Dependency management
-└── QUICK_START.md                 # 🚀 Quick start guide
+└── README.md                      # 📋 Project description
 ```
 
 ## 🔧 Troubleshooting
@@ -189,10 +160,11 @@ pip install hanlp     # Install HanLP
 **Q: Why is HanLP slow on first use?**
 A: HanLP needs to download deep learning models, first use requires patience. Recommend using in good network environment.
 
-**Q: How to verify architecture design?**
-A: Run the architecture demo program:
+**Q: How to quickly verify functionality?**
+A: Use sample files in the demo directory for testing:
 ```bash
-python3 tests/test_architecture_demo.py
+# Use GUI interface to import sample files from demo directory for testing
+python3 src/main_with_tokenizers.py
 ```
 
 **Q: How to choose the right tokenizer?**
@@ -207,8 +179,8 @@ A: Refer to tokenizer selection guide, choose based on speed and accuracy needs:
 - 🎯 **Multi-tokenizer Architecture**: Support for three mainstream Chinese tokenizers
 - 🚀 **Smart Switching**: Automatic detection and graceful fallback
 - 🎨 **Optimized Interface**: More user-friendly experience
-- 🔬 **Architecture Demo**: Complete feature demonstration without dependencies
 - 📊 **Detailed Statistics**: Enhanced result display and analysis
+- 🔧 **Drag-and-Drop Sorting**: Intuitive file correspondence management
 
 ### Backward Compatibility
 - ✅ Maintain original API interfaces unchanged
@@ -218,10 +190,9 @@ A: Refer to tokenizer selection guide, choose based on speed and accuracy needs:
 ## 📞 Technical Support
 
 For issues, please check:
-- `QUICK_START.md` - Quick start guide
-- `docs/project_development_summary.md` - Detailed development summary
-- `docs/test_cases.md` - Test case documentation
-- `tests/test_architecture_demo.py` - Architecture demo code
+- `demo/` directory - Contains sample files for testing
+- `docs/` directory - Detailed technical documentation
+- `requirements.txt` - Complete dependency list
 
 ## 📄 License
 

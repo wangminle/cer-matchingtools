@@ -27,14 +27,7 @@
 
 ## 📦 安装与依赖
 
-### 快速体验（推荐）
-```bash
-# 无需安装任何依赖，直接体验完整架构
-cd cer-matchingtools
-python3 tests/test_architecture_demo.py
-```
-
-### 完整安装
+### 安装依赖
 ```bash
 # 安装核心依赖
 pip install -r requirements.txt
@@ -81,32 +74,13 @@ python3 src/main_with_tokenizers.py
 - **控制区域**：统计按钮和选项配置
 - **结果展示区域**：详细的统计结果表格
 
-### 2. 架构演示方式
+### 2. 批量处理模式
 
+对于批量文件处理，直接运行GUI界面：
 ```bash
-python3 tests/test_architecture_demo.py
+python3 src/main_with_tokenizers.py
 ```
-
-这个演示程序：
-- 📚 **无需任何外部依赖**
-- 🔬 **展示完整架构设计**
-- ⚡ **快速验证功能**
-- 🧪 **适合开发测试**
-
-### 3. 命令行工具方式
-
-比较两个指定文件：
-
-```bash
-# 基本用法
-python3 src/check_accuracy.py --ref 参考文件.txt --asr ASR结果.txt
-
-# 显示详细错误分析
-python3 src/check_accuracy.py --ref 参考文件.txt --asr ASR结果.txt --details
-
-# 过滤语气词
-python3 src/check_accuracy.py --ref 参考文件.txt --asr ASR结果.txt --filter-fillers
-```
+然后按照界面操作步骤进行批量导入和处理。
 
 ## 🎯 分词器选择指南
 
@@ -164,15 +138,12 @@ cer-matchingtools/
 │   │       ├── jieba_tokenizer.py # Jieba实现
 │   │       ├── thulac_tokenizer.py# THULAC实现
 │   │       └── hanlp_tokenizer.py # HanLP实现
-│   ├── main_with_tokenizers.py    # 🎨 新版GUI界面
-│   ├── asr_metrics_refactored.py  # 📊 重构后的计算引擎
-│   └── v0.1.0/                    # 📦 原版本备份
-├── tests/
-│   └── test_architecture_demo.py  # 🔬 架构演示程序
-├── docs/                          # 📚 详细文档
+│   ├── main_with_tokenizers.py    # 🎨 GUI界面主程序
+│   ├── asr_metrics_refactored.py  # 📊 计算引擎
+│   └── requirements.txt           # 📦 依赖管理
+├── docs/                          # 📚 技术文档
 ├── demo/                          # 🧪 示例文件
-├── requirements.txt               # 📦 依赖管理
-└── QUICK_START.md                 # 🚀 快速开始
+└── README.md                      # 📋 项目说明
 ```
 
 ## 🔧 故障排除
@@ -189,10 +160,11 @@ pip install hanlp     # 安装HanLP
 **Q: HanLP首次使用很慢？**
 A: HanLP需要下载深度学习模型，首次使用需要耐心等待。建议在网络良好的环境下使用。
 
-**Q: 如何验证架构设计？**
-A: 运行架构演示程序：
+**Q: 如何快速验证功能？**
+A: 使用demo目录中的示例文件测试：
 ```bash
-python3 tests/test_architecture_demo.py
+# 使用GUI界面导入demo目录中的示例文件进行测试
+python3 src/main_with_tokenizers.py
 ```
 
 **Q: 如何选择合适的分词器？**
@@ -207,8 +179,8 @@ A: 参考分词器选择指南，根据速度和精度需求选择：
 - 🎯 **多分词器架构**：支持三种主流中文分词器
 - 🚀 **智能切换**：自动检测和优雅降级
 - 🎨 **优化界面**：更友好的用户体验
-- 🔬 **架构演示**：无依赖的完整功能演示
 - 📊 **详细统计**：增强的结果展示和分析
+- 🔧 **拖拽排序**：直观的文件对应关系管理
 
 ### 向后兼容
 - ✅ 保持原有API接口不变
@@ -218,10 +190,9 @@ A: 参考分词器选择指南，根据速度和精度需求选择：
 ## 📞 技术支持
 
 如有问题，请查看：
-- `QUICK_START.md` - 快速开始指南
-- `docs/project_development_summary.md` - 详细开发总结
-- `docs/test_cases.md` - 测试用例说明
-- `tests/test_architecture_demo.py` - 架构演示代码
+- `demo/` 目录 - 包含示例文件用于测试
+- `docs/` 目录 - 详细的技术文档
+- `requirements.txt` - 完整的依赖列表
 
 ## 📄 许可证
 
