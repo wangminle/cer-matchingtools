@@ -65,14 +65,14 @@ python3 src/main_with_tokenizers.py
 
 #### Operation Steps:
 1. **Select Tokenizer**: Choose the desired tokenizer in the top dropdown
-2. **Check Status**: Confirm tokenizer status shows green ✓
+2. **Check Status**: Confirm tokenizer status shows green ✓, click "Tokenizer Info" for detailed information
 3. **Import Files**:
    - Left: Click "Select ASR Files" to batch import ASR transcription results
    - Right: Click "Select Annotation Files" to batch import standard annotation files
 4. **Establish Correspondence**: Adjust file order by drag-and-drop
 5. **Configure Options**: Check "Filter Filler Words" as needed
 6. **Calculate Statistics**: Click "Start Calculation" button
-7. **View Results**: Result table shows detailed statistics
+7. **View Results**: Result table shows detailed statistics, including tokenizer type used
 8. **Export Data**: Click "Export Results" to save as file
 
 #### Interface Function Description:

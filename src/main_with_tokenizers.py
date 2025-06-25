@@ -7,7 +7,7 @@ from functools import partial
 
 # 导入重构后的ASRMetrics类和分词器模块
 from asr_metrics_refactored import ASRMetrics
-from text_tokenizers import get_available_tokenizers, get_tokenizer_info
+from text_tokenizers import get_available_tokenizers, get_tokenizer_info, get_cached_tokenizer_info
 
 
 class ASRComparisonTool:
@@ -110,7 +110,7 @@ class ASRComparisonTool:
             command=self.show_tokenizer_info,
             width=10
         )
-        self.tokenizer_info_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.tokenizer_info_btn.pack(side=tk.LEFT, padx=(10, 10))
         
         # 更新分词器状态
         self.update_tokenizer_status()
@@ -310,17 +310,49 @@ class ASRComparisonTool:
     
     def clear_tokenizer_cache(self):
         """清理分词器缓存"""
+        print("正在清理分词器缓存...")
+        
+        # 清理ASRMetrics缓存
         self.asr_metrics_cache.clear()
-        # 同时清理工厂缓存
-        from tokenizers import TokenizerFactory
-        TokenizerFactory.clear_cache()
+        
+        # 清理工厂类缓存
+        try:
+            from text_tokenizers.tokenizers.factory import TokenizerFactory
+            TokenizerFactory.clear_cache()
+            print("工厂类缓存已清理")
+        except Exception as e:
+            print(f"清理工厂类缓存失败: {str(e)}")
+        
+        # 更新分词器状态显示
         self.update_tokenizer_status()
+        print("缓存清理完成，状态已更新")
     
     def show_tokenizer_info(self):
         """显示分词器详细信息"""
         tokenizer_name = self.selected_tokenizer.get()
         try:
-            info = get_tokenizer_info(tokenizer_name)
+            # 🔧 修复: 优先使用工厂类的缓存信息获取方法
+            info = get_cached_tokenizer_info(tokenizer_name)
+            
+            # 如果工厂类缓存中没有，再检查ASRMetrics缓存
+            if info is None and tokenizer_name in self.asr_metrics_cache:
+                try:
+                    cached_metrics = self.asr_metrics_cache[tokenizer_name]
+                    info = cached_metrics.get_tokenizer_info()
+                    info['initialized'] = True
+                    info['available'] = True
+                    info['cached'] = True
+                    print(f"从ASRMetrics缓存获取{tokenizer_name}分词器信息")
+                except Exception as e:
+                    print(f"从ASRMetrics缓存获取信息失败: {str(e)}")
+                    info = None
+            
+            # 如果都没有缓存，则从工厂类获取（可能会触发初始化）
+            if info is None:
+                info = get_tokenizer_info(tokenizer_name)
+                print(f"从工厂类重新获取{tokenizer_name}分词器信息")
+            else:
+                print(f"使用缓存的{tokenizer_name}分词器信息")
             
             # 创建信息窗口
             info_window = tk.Toplevel(self.root)
@@ -347,7 +379,15 @@ class ASRComparisonTool:
             info_text = f"分词器名称: {info.get('name', 'N/A')}\n"
             info_text += f"类名: {info.get('class_name', 'N/A')}\n"
             info_text += f"版本: {info.get('version', 'N/A')}\n"
-            info_text += f"初始化状态: {'成功' if info.get('initialized', False) else '失败'}\n"
+            
+            # 🔧 修复: 更准确的缓存状态显示
+            init_status = "成功" if info.get('initialized', False) else "失败"
+            if info.get('cached', False):
+                init_status += " [已缓存]"
+            elif tokenizer_name in self.asr_metrics_cache:
+                init_status += " [ASR已缓存]"
+            info_text += f"初始化状态: {init_status}\n"
+            
             info_text += f"可用性: {'可用' if info.get('available', False) else '不可用'}\n\n"
             
             if 'description' in info:
@@ -367,6 +407,14 @@ class ASRComparisonTool:
             
             if 'note' in info:
                 info_text += f"注意事项: {info['note']}\n\n"
+            
+            # 🔧 修复: HanLP特有信息显示
+            if tokenizer_name == 'hanlp':
+                if 'tok_model' in info:
+                    info_text += f"分词模型: {info['tok_model']}\n"
+                if 'pos_model' in info:
+                    info_text += f"词性标注模型: {info['pos_model']}\n"
+                info_text += "\n"
             
             if not info.get('available', False) and 'error' in info:
                 info_text += f"错误信息: {info['error']}\n"

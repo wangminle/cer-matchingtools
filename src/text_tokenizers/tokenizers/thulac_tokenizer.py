@@ -46,8 +46,27 @@ class ThulacTokenizer(BaseTokenizer):
                 
                 # 获取版本信息
                 try:
-                    self.version = getattr(thulac, '__version__', 'unknown')
-                except:
+                    # 🔧 修复: 使用importlib.metadata获取版本信息（Python 3.8+推荐方式）
+                    try:
+                        from importlib.metadata import version
+                        self.version = version('thulac')
+                    except ImportError:
+                        # Python < 3.8 使用importlib_metadata
+                        try:
+                            from importlib_metadata import version
+                            self.version = version('thulac')
+                        except ImportError:
+                            # 备用方案：使用pkg_resources
+                            try:
+                                import pkg_resources
+                                self.version = pkg_resources.get_distribution('thulac').version
+                            except:
+                                # 最后备用方案：尝试从模块属性获取
+                                self.version = getattr(thulac, '__version__', '0.2.x')
+                    except Exception as e:
+                        print(f"获取THULAC版本失败: {str(e)}")
+                        self.version = '0.2.x'  # 设置默认版本
+                except Exception:
                     self.version = 'unknown'
                 
                 self.is_initialized = True

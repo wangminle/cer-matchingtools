@@ -122,6 +122,19 @@ class TokenizerFactory:
                 'error': f'不支持的分词器: {name}'
             }
         
+        # 🔧 修复: 优先从缓存获取信息，避免重复初始化
+        if name in cls._tokenizers:
+            try:
+                cached_tokenizer = cls._tokenizers[name]
+                info = cached_tokenizer.get_info()
+                info['available'] = True
+                # 确保缓存的实例显示正确的初始化状态
+                info['initialized'] = cached_tokenizer.is_initialized
+                return info
+            except Exception as e:
+                print(f"从缓存获取{name}分词器信息失败: {str(e)}")
+        
+        # 如果缓存中没有，再尝试创建新实例
         try:
             tokenizer = cls.get_tokenizer(name)
             info = tokenizer.get_info()
@@ -133,6 +146,34 @@ class TokenizerFactory:
                 'available': False,
                 'error': str(e)
             }
+    
+    @classmethod
+    def get_cached_tokenizer_info(cls, name: str) -> Dict[str, Any]:
+        """
+        获取已缓存分词器的信息（不会触发新的初始化）
+        
+        Args:
+            name (str): 分词器名称
+            
+        Returns:
+            Dict[str, Any]: 分词器信息字典，如果未缓存返回None
+        """
+        if name not in cls._available_tokenizers:
+            return None
+        
+        if name in cls._tokenizers:
+            try:
+                cached_tokenizer = cls._tokenizers[name]
+                info = cached_tokenizer.get_info()
+                info['available'] = True
+                info['initialized'] = cached_tokenizer.is_initialized
+                info['cached'] = True
+                return info
+            except Exception as e:
+                print(f"从缓存获取{name}分词器信息失败: {str(e)}")
+                return None
+        
+        return None
     
     @classmethod
     def check_tokenizer_availability(cls, name: str) -> bool:
@@ -245,3 +286,17 @@ def get_tokenizer_info(name: str) -> Dict[str, Any]:
     """
     factory = TokenizerFactory()
     return factory.get_tokenizer_info(name)
+
+
+def get_cached_tokenizer_info(name: str) -> Dict[str, Any]:
+    """
+    获取已缓存分词器信息的便捷函数
+    
+    Args:
+        name (str): 分词器名称
+        
+    Returns:
+        Dict[str, Any]: 分词器信息字典，如果未缓存返回None
+    """
+    factory = TokenizerFactory()
+    return factory.get_cached_tokenizer_info(name)

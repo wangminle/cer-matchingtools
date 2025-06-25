@@ -63,7 +63,7 @@ This file uses `tkinter` to build a graphical user interface with multi-tokenize
     *   **Text:** "Tokenizer Info"
     *   **Command:** `self.show_tokenizer_info`
     *   **Width:** 10
-    *   **Layout:** `pack(side=tk.LEFT, padx=(0, 10))`
+    *   **Layout:** `pack(side=tk.LEFT, padx=(10, 10))` (10 pixels spacing on both sides, button shifted right)
 
 ## Layer 2: File Selection Area
 
@@ -275,9 +275,10 @@ This file uses `tkinter` to build a graphical user interface with multi-tokenize
 5. **Graceful Degradation Mechanism**: Automatically fallback to jieba when tokenizers are unavailable
 
 ### 🔧 Layout Optimization Improvements
-1. **Compact Tokenizer Selection Area**: Horizontally arranged all tokenizer-related controls
+1. **Compact Tokenizer Selection Area**: Horizontally arranged all tokenizer-related controls with optimized spacing
 2. **Optimized File Display Area**: Canvas height adjusted to 120 pixels
 3. **Enhanced Result Table**: Added "Tokenizer" column showing the tokenizer type used
 4. **Unified Layout Style**: All buttons center-aligned, improving visual consistency
+5. **Fine-tuned Control Layout**: Tokenizer info button shifted right by 10 pixels, improving interface balance
 
 This new version UI design document covers all major UI components defined in `src/main_with_tokenizers.py`, particularly highlighting the multi-tokenizer support as the core new feature. The interface layout has been optimized to maintain the completeness of original functionality while adding powerful tokenizer switching capabilities. 

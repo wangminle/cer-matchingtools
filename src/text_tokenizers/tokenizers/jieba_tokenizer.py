@@ -37,7 +37,24 @@ class JiebaTokenizer(BaseTokenizer):
                 raise TokenizerInitError("Jieba分词器测试失败")
             
             # 获取jieba版本信息
-            self.version = getattr(jieba, '__version__', 'unknown')
+            try:
+                # 🔧 优化: 使用多种方式获取版本信息
+                try:
+                    from importlib.metadata import version
+                    self.version = version('jieba')
+                except ImportError:
+                    # Python < 3.8 使用importlib_metadata
+                    try:
+                        from importlib_metadata import version
+                        self.version = version('jieba')
+                    except ImportError:
+                        # 备用方案：从模块属性获取
+                        self.version = getattr(jieba, '__version__', 'unknown')
+                except Exception as e:
+                    print(f"获取Jieba版本失败: {str(e)}")
+                    self.version = getattr(jieba, '__version__', 'unknown')
+            except Exception:
+                self.version = 'unknown'
             
             self.is_initialized = True
             return True
