@@ -1,4 +1,4 @@
- # ASR字准确率对比工具 - 项目管理文档
+# ASR字准确率对比工具 - 项目管理文档
 
 ## 项目概述
 本项目是一个用于批量对比ASR（自动语音识别）转写结果与标准文本之间字准确率的Python工具，支持GUI界面、命令行和示例测试三种使用方式。
@@ -69,13 +69,15 @@
 
 #### 1.1 创建模块化结构
 ```
-src/
-├── tokenizers/
+dev/src/
+├── text_tokenizers/
 │   ├── __init__.py          # 基础抽象类和异常定义
-│   ├── jieba_tokenizer.py   # Jieba分词器实现
-│   ├── thulac_tokenizer.py  # THULAC分词器实现
-│   ├── hanlp_tokenizer.py   # HanLP分词器实现
-│   └── factory.py           # 分词器工厂和管理器
+│   └── tokenizers/          # 分词器实现
+│       ├── base.py          # 基类和异常定义
+│       ├── factory.py       # 分词器工厂和管理器
+│       ├── jieba_tokenizer.py   # Jieba分词器实现
+│       ├── thulac_tokenizer.py  # THULAC分词器实现
+│       └── hanlp_tokenizer.py   # HanLP分词器实现
 ```
 
 #### 1.2 核心接口定义
@@ -267,14 +269,14 @@ src/
 
 | 文件 | 行数 | 占比 | 功能说明 |
 |------|------|------|----------|
-| **src/main_with_tokenizers.py** | 665行 | 28.1% | 🎨 GUI主界面程序 |
-| **src/asr_metrics_refactored.py** | 520行 | 22.0% | 📊 重构后的计算引擎 |
-| **src/text_tokenizers/tokenizers/factory.py** | 301行 | 12.7% | 🏭 分词器工厂类 |
-| **src/text_tokenizers/tokenizers/hanlp_tokenizer.py** | 283行 | 12.0% | 🤖 HanLP分词器实现 |
-| **src/text_tokenizers/tokenizers/thulac_tokenizer.py** | 246行 | 10.4% | 🎓 THULAC分词器实现 |
-| **src/text_tokenizers/tokenizers/jieba_tokenizer.py** | 161行 | 6.8% | ⚡ Jieba分词器实现 |
-| **src/text_tokenizers/tokenizers/base.py** | 142行 | 6.0% | 🔧 抽象基类定义 |
-| **src/text_tokenizers/__init__.py** | 45行 | 1.9% | 📦 模块导出接口 |
+| **dev/src/main_with_tokenizers.py** | 665行 | 28.1% | 🎨 GUI主界面程序 |
+| **dev/src/asr_metrics_refactored.py** | 520行 | 22.0% | 📊 重构后的计算引擎 |
+| **dev/src/text_tokenizers/tokenizers/factory.py** | 301行 | 12.7% | 🏭 分词器工厂类 |
+| **dev/src/text_tokenizers/tokenizers/hanlp_tokenizer.py** | 283行 | 12.0% | 🤖 HanLP分词器实现 |
+| **dev/src/text_tokenizers/tokenizers/thulac_tokenizer.py** | 246行 | 10.4% | 🎓 THULAC分词器实现 |
+| **dev/src/text_tokenizers/tokenizers/jieba_tokenizer.py** | 161行 | 6.8% | ⚡ Jieba分词器实现 |
+| **dev/src/text_tokenizers/tokenizers/base.py** | 142行 | 6.0% | 🔧 抽象基类定义 |
+| **dev/src/text_tokenizers/__init__.py** | 45行 | 1.9% | 📦 模块导出接口 |
 
 ### 🎯 **架构特点分析：**
 
@@ -294,3 +296,72 @@ src/
 - 📊 计算引擎重构优化 (392行)
 
 总的来说，**2,363行**的代码量体现了一个功能完善、架构清晰的专业级ASR字准确率分析工具！🚀
+
+## 📁 **最新项目目录结构调整（2024年12月）**
+
+### ✅ 目录结构重组完成
+为了符合项目cursorrules规范，已完成以下目录结构调整：
+
+#### **新的规范化目录结构：**
+```
+cer-matchingtools/
+├── dev/                             # 开发目录（新增）
+│   ├── src/                         # 所有源代码（从根目录/src移入）
+│   │   ├── main_with_tokenizers.py          # 主程序入口
+│   │   ├── asr_metrics_refactored.py        # CER计算引擎
+│   │   ├── requirements.txt                 # 依赖声明
+│   │   ├── text_tokenizers/                 # 分词器模块
+│   │   │   ├── __init__.py                  # 模块初始化
+│   │   │   └── tokenizers/                  # 分词器实现
+│   │   │       ├── base.py                  # 基类和异常定义
+│   │   │       ├── factory.py               # 工厂类和管理器
+│   │   │       ├── jieba_tokenizer.py       # Jieba分词器
+│   │   │       ├── thulac_tokenizer.py      # THULAC分词器
+│   │   │       └── hanlp_tokenizer.py       # HanLP分词器
+│   │   └── v0.1.0/                         # 历史版本代码
+│   └── output/                      # 开发过程输出文件（新增）
+├── docs/                           # 项目文档目录
+│   ├── Cer-MatchingTools-V1-架构设计.md          # 新增架构设计文档
+│   ├── Cer-MatchingTools-V1-需求规格说明书.md     # 新增需求规格说明书
+│   ├── Cer-MatchingTools-V1-项目管理.md          # 项目管理文档
+│   ├── Cer-MatchingTools-V1-UIdefinition.md     # UI设计说明文档
+│   └── 其他设计文档...
+├── tests/                          # 测试脚本和文档目录
+├── release/                        # 发布文件目录
+└── ref/                            # 参考资料目录（新增）
+    ├── demo/                       # 示例文件（从根目录移入）
+    │   ├── asr_result2.txt
+    │   ├── ref_text2.txt
+    │   └── ...
+    └── logo/                       # 项目logo（从根目录移入）
+        └── cer-logo.png
+```
+
+### ✅ 调整内容总结：
+
+#### **已完成的结构调整：**
+1. **✅ 创建/dev目录**：符合cursorrules开发目录要求
+2. **✅ 移动源代码**：将/src目录内容移动到/dev/src/
+3. **✅ 创建/dev/output目录**：用于开发过程输出文件
+4. **✅ 创建/ref目录**：存放参考资料和文档
+5. **✅ 移动demo文件**：将示例文件移入/ref/demo/
+6. **✅ 移动logo文件**：将logo移入/ref/logo/
+7. **✅ 创建架构设计文档**：完善重要文档
+8. **✅ 创建需求规格说明书**：完善重要文档
+
+#### **符合cursorrules的改进：**
+- ✅ 开发代码统一放在/dev/src目录
+- ✅ 输出文件统一放在/dev/output目录（预留）
+- ✅ 测试相关放在/tests目录
+- ✅ 发布文件放在/release目录
+- ✅ 参考资料放在/ref目录且不允许修改
+- ✅ 重要文档使用规范前缀命名
+
+#### **文档完善情况：**
+- ✅ 架构设计文档：`Cer-MatchingTools-V1-架构设计.md`
+- ✅ 需求规格说明书：`Cer-MatchingTools-V1-需求规格说明书.md`
+- ✅ 项目管理文档：`Cer-MatchingTools-V1-项目管理.md`
+- ✅ UI设计说明文档：`Cer-MatchingTools-V1-UIdefinition.md`
+
+### **规范化效果：**
+本次目录结构调整完全符合项目cursorrules要求，为后续开发提供了清晰的目录规范和完善的文档体系。

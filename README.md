@@ -30,7 +30,7 @@ A Python-based tool for batch comparing character accuracy rates between ASR (Au
 ### Installation
 ```bash
 # Install core dependencies
-pip install -r requirements.txt
+pip install -r dev/src/requirements.txt
 
 # Optional: Install other tokenizers
 pip install thulac    # Install THULAC tokenizer
@@ -53,7 +53,7 @@ pip install hanlp     # Install HanLP tokenizer (large, first use requires model
 ### 1. GUI Mode (Recommended)
 
 ```bash
-python3 src/main_with_tokenizers.py
+python3 dev/src/main_with_tokenizers.py
 ```
 
 #### Operation Steps:
@@ -78,7 +78,7 @@ python3 src/main_with_tokenizers.py
 
 For batch file processing, run the GUI interface directly:
 ```bash
-python3 src/main_with_tokenizers.py
+python3 dev/src/main_with_tokenizers.py
 ```
 Then follow the interface operation steps for batch import and processing.
 
@@ -129,21 +129,27 @@ Where:
 
 ```
 cer-matchingtools/
-├── src/
-│   ├── text_tokenizers/           # 🧠 Core tokenizer module
-│   │   ├── __init__.py            # Module export interface
-│   │   └── tokenizers/            # Tokenizer implementations
-│   │       ├── base.py            # Abstract base class
-│   │       ├── factory.py         # Factory class
-│   │       ├── jieba_tokenizer.py # Jieba implementation
-│   │       ├── thulac_tokenizer.py# THULAC implementation
-│   │       └── hanlp_tokenizer.py # HanLP implementation
-│   ├── main_with_tokenizers.py    # 🎨 GUI interface main program
-│   ├── asr_metrics_refactored.py  # 📊 Calculation engine
-│   └── requirements.txt           # 📦 Dependency management
-├── docs/                          # 📚 Technical documentation
-├── demo/                          # 🧪 Example files
-└── README.md                      # 📋 Project description
+├── dev/
+│   ├── src/                           # 🧠 Core source code
+│   │   ├── text_tokenizers/           # Tokenizer module
+│   │   │   ├── __init__.py            # Module export interface
+│   │   │   └── tokenizers/            # Tokenizer implementations
+│   │   │       ├── base.py            # Abstract base class
+│   │   │       ├── factory.py         # Factory class
+│   │   │       ├── jieba_tokenizer.py # Jieba implementation
+│   │   │       ├── thulac_tokenizer.py# THULAC implementation
+│   │   │       └── hanlp_tokenizer.py # HanLP implementation
+│   │   ├── main_with_tokenizers.py    # 🎨 GUI interface main program
+│   │   ├── asr_metrics_refactored.py  # 📊 Calculation engine
+│   │   └── requirements.txt           # 📦 Dependency management
+│   └── output/                        # Development output files
+├── docs/                              # 📚 Technical documentation
+├── tests/                             # 🧪 Test files and scripts
+├── release/                           # 📦 Release packages
+├── ref/                               # 📋 Reference materials
+│   ├── demo/                          # Example files
+│   └── logo/                          # Project logo
+└── README.md                          # 📋 Project description
 ```
 
 ## 🔧 Troubleshooting
@@ -161,10 +167,10 @@ pip install hanlp     # Install HanLP
 A: HanLP needs to download deep learning models, first use requires patience. Recommend using in good network environment.
 
 **Q: How to quickly verify functionality?**
-A: Use sample files in the demo directory for testing:
+A: Use sample files in the ref/demo directory for testing:
 ```bash
-# Use GUI interface to import sample files from demo directory for testing
-python3 src/main_with_tokenizers.py
+# Use GUI interface to import sample files from ref/demo directory for testing
+python3 dev/src/main_with_tokenizers.py
 ```
 
 **Q: How to choose the right tokenizer?**
@@ -190,9 +196,9 @@ A: Refer to tokenizer selection guide, choose based on speed and accuracy needs:
 ## 📞 Technical Support
 
 For issues, please check:
-- `demo/` directory - Contains sample files for testing
+- `ref/demo/` directory - Contains sample files for testing
 - `docs/` directory - Detailed technical documentation
-- `requirements.txt` - Complete dependency list
+- `dev/src/requirements.txt` - Complete dependency list
 
 ## 📄 License
 

@@ -1,20 +1,140 @@
+# Python项目标准忽略文件
+# ================================
+
 # 虚拟环境
 .venv/
 venv/
 ENV/
 env/
+.env
+pipenv/
+.pipenv/
 
 # Python 缓存文件
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# 分发 / 打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 单元测试 / 覆盖率报告
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
 
 # 系统文件
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# IDE文件
+# IDE和编辑器文件
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# 项目特定文件
+# ================================
+
+# 开发过程输出文件（根据cursorrules）
+/dev/output/*
+!/dev/output/.gitkeep
+
+# 临时文件和日志
+*.log
+*.tmp
+temp/
+tmp/
+
+# 模型文件（HanLP等大型模型）
+*.bin
+*.pkl
+*.model
+models/
+data/
+
+# 测试生成的临时文件
+/tests/temp/
+/tests/output/
+test_*.txt
+*_test_output.*
+
+# 用户配置文件
+config.ini
+settings.json
+user_config.*
+
+# 备份文件
+*.bak
+*.orig
+*.backup
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 文档生成文件
+_build/
+.doctrees/
+
+# 本地开发环境特定文件
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 性能分析文件
+*.prof
+profile_*
