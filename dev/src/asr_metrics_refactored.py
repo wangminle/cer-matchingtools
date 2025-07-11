@@ -264,40 +264,43 @@ class ASRMetrics:
     def _calculate_edit_distance(self, s1: str, s2: str) -> int:
         """
         计算两个字符串的编辑距离（Levenshtein距离）
+        使用动态规划算法，当python-Levenshtein库不可用时的备用实现
         
         Args:
             s1 (str): 第一个字符串
             s2 (str): 第二个字符串
             
         Returns:
-            int: 编辑距离
+            int: 编辑距离（最少需要多少次编辑操作使两个字符串相同）
         """
+        # 边界条件处理
         if len(s1) == 0:
-            return len(s2)
+            return len(s2)  # 插入s2的所有字符
         if len(s2) == 0:
-            return len(s1)
+            return len(s1)  # 删除s1的所有字符
         
-        # 创建距离矩阵
+        # 创建编辑距离矩阵，使用动态规划
         matrix = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
         
-        # 初始化第一行和第一列
+        # 初始化第一行和第一列（基础情况）
         for i in range(len(s1) + 1):
-            matrix[i][0] = i
+            matrix[i][0] = i  # 从空字符串到s1[:i]需要i次插入
         for j in range(len(s2) + 1):
-            matrix[0][j] = j
+            matrix[0][j] = j  # 从空字符串到s2[:j]需要j次插入
         
-        # 计算距离
+        # 填充矩阵，计算最小编辑距离
         for i in range(1, len(s1) + 1):
             for j in range(1, len(s2) + 1):
                 if s1[i-1] == s2[j-1]:
-                    cost = 0
+                    cost = 0  # 字符相同，无需编辑
                 else:
-                    cost = 1
+                    cost = 1  # 字符不同，需要替换
                 
+                # 选择三种操作中代价最小的
                 matrix[i][j] = min(
-                    matrix[i-1][j] + 1,      # 删除
-                    matrix[i][j-1] + 1,      # 插入
-                    matrix[i-1][j-1] + cost  # 替换
+                    matrix[i-1][j] + 1,      # 删除操作
+                    matrix[i][j-1] + 1,      # 插入操作
+                    matrix[i-1][j-1] + cost  # 替换操作（或匹配）
                 )
         
         return matrix[len(s1)][len(s2)]

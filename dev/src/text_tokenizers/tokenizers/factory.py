@@ -25,6 +25,13 @@ class TokenizerFactory:
     }
     
     def __new__(cls):
+        """
+        单例模式实现
+        确保工厂类在整个应用程序中只有一个实例
+        
+        Returns:
+            TokenizerFactory: 工厂类的唯一实例
+        """
         if cls._instance is None:
             cls._instance = super(TokenizerFactory, cls).__new__(cls)
         return cls._instance

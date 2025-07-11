@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ASR字准确率对比工具 - 主程序
+支持多种分词器的图形界面应用程序
+
+功能特性：
+- 支持多种分词器：jieba、THULAC、HanLP
+- 批量文件处理和拖拽排序
+- 语气词过滤功能
+- 结果导出为TXT/CSV格式
+- 多编码格式支持
+
+作者：CER-MatchingTools项目组
+版本：V1.0
+"""
+
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
@@ -11,40 +28,56 @@ from text_tokenizers import get_available_tokenizers, get_tokenizer_info, get_ca
 
 
 class ASRComparisonTool:
+    """
+    ASR字准确率对比工具主类
+    
+    提供图形用户界面，支持多种分词器的字准确率计算工具
+    主要功能包括：
+    - 文件选择和管理
+    - 分词器选择和配置
+    - 字准确率计算
+    - 结果展示和导出
+    """
+    
     def __init__(self, root):
+        """
+        初始化ASR对比工具界面
+        
+        Args:
+            root: tkinter主窗口对象
+        """
+        # 主窗口设置
         self.root = root
         self.root.title("ASR字准确率对比工具 - 多分词器版本")
         self.root.geometry("800x650")  # 增加一些高度以容纳分词器选择
-        # 设置窗口大小不可调整，但支持最大化
+        # 设置窗口大小可调整，支持最大化
         self.root.resizable(True, True)
-        # 设置minsize，确保窗口不会小于800x650
+        # 设置最小窗口大小，确保界面完整显示
         self.root.minsize(800, 650)
         
-        # 存储文件列表和配对信息
-        self.asr_files = []
-        self.ref_files = []
-        self.file_pairs = []
-        self.results = []
+        # 数据存储变量
+        self.asr_files = []  # ASR转写结果文件列表
+        self.ref_files = []  # 标注文件列表
+        self.file_pairs = []  # 文件配对信息
+        self.results = []  # 计算结果列表
         
         # 性能优化：缓存ASRMetrics实例，避免重复创建
         self.asr_metrics_cache = {}
         
         # 创建主框架分为上下两部分
         self.top_frame = ttk.Frame(root)
-        self.top_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=5)  # 不再扩展，固定上部区域高度
+        self.top_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=5)  # 固定上部区域高度
         
         self.bottom_frame = ttk.Frame(root)
-        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)  # 让下部结果区域自动扩展
+        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)  # 下部结果区域自动扩展
         
-        # 语气词过滤设置
-        self.filter_fillers = tk.BooleanVar(value=False)
+        # 控制变量设置
+        self.filter_fillers = tk.BooleanVar(value=False)  # 语气词过滤开关
+        self.selected_tokenizer = tk.StringVar(value="jieba")  # 默认选择jieba分词器
+        self.available_tokenizers = []  # 可用分词器列表
         
-        # 分词器设置
-        self.selected_tokenizer = tk.StringVar(value="jieba")  # 默认选择jieba
-        self.available_tokenizers = []
-        
-        # 提示框变量
-        self.tooltip_window = None
+        # UI辅助变量
+        self.tooltip_window = None  # 提示框窗口对象
         
         # 初始化分词器列表
         self._init_tokenizers()
@@ -53,25 +86,34 @@ class ASRComparisonTool:
         self._init_ui()
     
     def _init_tokenizers(self):
-        """初始化可用的分词器列表"""
+        """
+        初始化可用的分词器列表
+        检测系统中已安装的分词器，设置默认分词器
+        """
         try:
+            # 获取系统中可用的分词器
             self.available_tokenizers = get_available_tokenizers()
             if not self.available_tokenizers:
-                self.available_tokenizers = ["jieba"]  # 确保至少有jieba
+                self.available_tokenizers = ["jieba"]  # 确保至少有jieba作为默认选项
             
-            # 如果jieba可用，设为默认值
+            # 设置默认分词器
             if "jieba" in self.available_tokenizers:
-                self.selected_tokenizer.set("jieba")
+                self.selected_tokenizer.set("jieba")  # jieba优先作为默认值
             else:
                 # 如果jieba不可用，选择第一个可用的分词器
                 self.selected_tokenizer.set(self.available_tokenizers[0])
                 
         except Exception as e:
             print(f"警告: 初始化分词器列表失败: {str(e)}")
+            # 异常情况下使用jieba作为备选
             self.available_tokenizers = ["jieba"]
             self.selected_tokenizer.set("jieba")
     
     def _init_ui(self):
+        """
+        初始化用户界面
+        创建所有GUI组件并设置布局
+        """
         # 上半部分 - 分词器选择区域（新增）
         self.tokenizer_frame = ttk.LabelFrame(self.top_frame, text="分词器选择")
         self.tokenizer_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -278,41 +320,56 @@ class ASRComparisonTool:
         self.drag_data = {"x": 0, "y": 0, "item": None, "canvas": None}
     
     def on_tokenizer_change(self, event=None):
-        """分词器选择变化时的回调函数"""
+        """
+        分词器选择变化时的回调函数
+        当用户切换分词器时，更新状态显示
+        
+        Args:
+            event: 事件对象（可选）
+        """
         self.update_tokenizer_status()
     
     def update_tokenizer_status(self):
-        """更新分词器状态显示"""
+        """
+        更新分词器状态显示
+        检查当前选中分词器的可用性和版本信息，更新状态标签
+        """
         tokenizer_name = self.selected_tokenizer.get()
         try:
-            # 性能优化：使用缓存的信息
+            # 性能优化：使用缓存的信息避免重复检测
             info = get_tokenizer_info(tokenizer_name)
             if info.get('available', False):
+                # 分词器可用，显示绿色状态
                 version = info.get('version', 'unknown')
                 status_text = f"✓ {tokenizer_name} (v{version})"
                 if tokenizer_name in self.asr_metrics_cache:
-                    status_text += " [已缓存]"
+                    status_text += " [已缓存]"  # 标记已缓存的分词器
                 self.tokenizer_status_label.config(
                     text=status_text,
                     foreground="green"
                 )
             else:
+                # 分词器不可用，显示红色错误状态
                 error_msg = info.get('error', '未知错误')
                 self.tokenizer_status_label.config(
                     text=f"✗ {tokenizer_name} - {error_msg[:20]}...",
                     foreground="red"
                 )
         except Exception as e:
+            # 获取信息失败，显示错误状态
             self.tokenizer_status_label.config(
                 text=f"✗ {tokenizer_name} - 获取信息失败",
                 foreground="red"
             )
     
     def clear_tokenizer_cache(self):
-        """清理分词器缓存"""
+        """
+        清理分词器缓存
+        释放内存，清除所有已缓存的分词器实例
+        """
         print("正在清理分词器缓存...")
         
-        # 清理ASRMetrics缓存
+        # 清理ASRMetrics实例缓存
         self.asr_metrics_cache.clear()
         
         # 清理工厂类缓存
@@ -323,12 +380,15 @@ class ASRComparisonTool:
         except Exception as e:
             print(f"清理工厂类缓存失败: {str(e)}")
         
-        # 更新分词器状态显示
+        # 更新界面状态显示
         self.update_tokenizer_status()
         print("缓存清理完成，状态已更新")
     
     def show_tokenizer_info(self):
-        """显示分词器详细信息"""
+        """
+        显示分词器详细信息
+        弹出窗口展示当前选中分词器的详细配置和状态信息
+        """
         tokenizer_name = self.selected_tokenizer.get()
         try:
             # 🔧 修复: 优先使用工厂类的缓存信息获取方法
@@ -430,45 +490,79 @@ class ASRComparisonTool:
             messagebox.showerror("错误", f"获取分词器信息失败: {str(e)}")
 
     def select_asr_files(self):
+        """
+        选择ASR转写结果文件
+        打开文件选择对话框，允许用户选择多个ASR文件
+        """
         files = filedialog.askopenfilenames(filetypes=[("文本文件", "*.txt")])
         self.asr_files = list(files)
         self.update_canvas_items(self.asr_canvas, self.asr_files)
 
     def select_ref_files(self):
+        """
+        选择标注文件
+        打开文件选择对话框，允许用户选择多个标注文件
+        """
         files = filedialog.askopenfilenames(filetypes=[("文本文件", "*.txt")])
         self.ref_files = list(files)
         self.update_canvas_items(self.ref_canvas, self.ref_files)
 
     def update_canvas_items(self, canvas, file_list):
-        canvas.delete("all")
-        y_pos = 20
+        """
+        更新Canvas中的文件显示
+        在Canvas上绘制文件列表，支持拖拽排序
+        
+        Args:
+            canvas: 目标Canvas对象
+            file_list: 要显示的文件路径列表
+        """
+        canvas.delete("all")  # 清空Canvas内容
+        y_pos = 20  # 起始Y坐标
         for i, file_path in enumerate(file_list):
-            filename = os.path.basename(file_path)
+            filename = os.path.basename(file_path)  # 提取文件名
+            # 创建文本项，设置标签用于拖拽识别
             item_id = canvas.create_text(20, y_pos, text=filename, anchor="w", tags=(f"file_{i}", file_path))
             canvas.itemconfig(item_id, tags=(f"file_{i}", file_path))
-            y_pos += 40
+            y_pos += 40  # 行间距40像素
 
     def on_press(self, event):
+        """
+        鼠标按下事件处理
+        开始拖拽操作，记录起始位置和拖拽项目
+        
+        Args:
+            event: 鼠标事件对象
+        """
         canvas = event.widget
-        closest = canvas.find_closest(event.x, event.y)
+        closest = canvas.find_closest(event.x, event.y)  # 找到最近的画布项目
         if closest:
             tags = canvas.gettags(closest)
             if tags and tags[0].startswith("file_"):
+                # 记录拖拽数据
                 self.drag_data["item"] = closest
                 self.drag_data["x"] = event.x
                 self.drag_data["y"] = event.y
                 self.drag_data["canvas"] = canvas
 
     def on_drag(self, event):
+        """
+        鼠标拖拽事件处理
+        实时更新被拖拽项目的位置
+        
+        Args:
+            event: 鼠标事件对象
+        """
         if self.drag_data["item"]:
+            # 计算位移量
             dx = event.x - self.drag_data["x"]
             dy = event.y - self.drag_data["y"]
             
             canvas = self.drag_data["canvas"]
             item = self.drag_data["item"]
             
+            # 只允许垂直方向移动
             canvas.move(item, 0, dy)
-            # 同时移动文本标签
+            # 同时移动同标签的其他元素
             tags = canvas.gettags(item)
             for tag in tags:
                 if tag.startswith("file_"):
@@ -477,14 +571,32 @@ class ASRComparisonTool:
                         if text_item != item:
                             canvas.move(text_item, 0, dy)
             
+            # 更新拖拽位置记录
             self.drag_data["x"] = event.x
             self.drag_data["y"] = event.y
 
     def on_release(self, event):
+        """
+        鼠标释放事件处理
+        结束拖拽操作，清除拖拽状态
+        
+        Args:
+            event: 鼠标事件对象
+        """
         self.drag_data["item"] = None
         self.drag_data["canvas"] = None
 
     def get_file_order(self, canvas):
+        """
+        获取Canvas中文件的当前排序
+        根据文件项目的Y坐标位置确定文件顺序
+        
+        Args:
+            canvas: 目标Canvas对象
+            
+        Returns:
+            list: 按当前位置排序的文件路径列表
+        """
         items = canvas.find_all()
         file_items = {}
         
@@ -493,38 +605,44 @@ class ASRComparisonTool:
             if tags and tags[0].startswith("file_"):
                 coords = canvas.coords(item)
                 if len(coords) >= 2:  # 确保有足够的坐标信息
-                    y_pos = coords[1]  # 获取y坐标
+                    y_pos = coords[1]  # 获取Y坐标
                     file_path = tags[1] if len(tags) > 1 else None
                     if file_path:
                         file_items[y_pos] = file_path
         
-        # 按y坐标排序
+        # 按Y坐标排序，返回文件路径列表
         return [file_items[y] for y in sorted(file_items.keys())]
 
     def calculate_accuracy(self):
-        # 清空结果
+        """
+        计算字准确率
+        主要计算流程：
+        1. 验证文件配对
+        2. 初始化分词器
+        3. 逐对计算准确率
+        4. 更新结果显示
+        """
+        # 清空之前的计算结果
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
         
         self.results = []
         
-        # 获取排序后的文件列表
+        # 获取当前文件排序
         sorted_asr_files = self.get_file_order(self.asr_canvas)
         sorted_ref_files = self.get_file_order(self.ref_canvas)
         
-        # 检查文件数量是否匹配
+        # 验证文件数量匹配
         if len(sorted_asr_files) != len(sorted_ref_files):
             messagebox.showerror("错误", "ASR文件和标注文件数量不匹配！")
             return
         
-        # 获取语气词过滤设置
-        filter_fillers = self.filter_fillers.get()
-        
-        # 获取选择的分词器
-        tokenizer_name = self.selected_tokenizer.get()
+        # 获取用户设置
+        filter_fillers = self.filter_fillers.get()  # 语气词过滤设置
+        tokenizer_name = self.selected_tokenizer.get()  # 选择的分词器
         
         try:
-            # 性能优化：使用缓存的ASRMetrics实例，避免重复创建
+            # 性能优化：使用缓存的ASRMetrics实例
             if tokenizer_name not in self.asr_metrics_cache:
                 print(f"初始化{tokenizer_name}分词器...")
                 self.asr_metrics_cache[tokenizer_name] = ASRMetrics(tokenizer_name=tokenizer_name)
@@ -534,19 +652,20 @@ class ASRComparisonTool:
             # 逐对计算字准确率
             for asr_file, ref_file in zip(sorted_asr_files, sorted_ref_files):
                 try:
-                    # 读取文件内容
+                    # 读取文件内容（支持多种编码）
                     asr_text = self.read_file_with_multiple_encodings(asr_file)
                     ref_text = self.read_file_with_multiple_encodings(ref_file)
                     
-                    # 使用ASRMetrics计算各项指标，传入语气词过滤设置
+                    # 计算详细指标
                     metrics = asr_metrics.calculate_detailed_metrics(ref_text, asr_text, filter_fillers)
                     
-                    # 获取结果
+                    # 提取计算结果
                     accuracy = metrics['accuracy']
                     ref_chars = metrics['ref_length']
                     asr_chars = metrics['hyp_length']
                     used_tokenizer = metrics.get('tokenizer', tokenizer_name)
                     
+                    # 构建结果数据
                     result = {
                         "asr_file": os.path.basename(asr_file),
                         "ref_file": os.path.basename(ref_file),
@@ -554,13 +673,13 @@ class ASRComparisonTool:
                         "ref_chars": ref_chars,
                         "accuracy": accuracy,
                         "details": metrics,  # 保存详细指标供后续使用
-                        "filter_fillers": filter_fillers,  # 记录是否应用了语气词过滤
+                        "filter_fillers": filter_fillers,  # 记录语气词过滤状态
                         "tokenizer": used_tokenizer  # 记录使用的分词器
                     }
                     
                     self.results.append(result)
                     
-                    # 添加到结果表格
+                    # 添加到结果表格显示
                     self.result_tree.insert("", "end", values=(
                         result["asr_file"],
                         result["ref_file"],
@@ -579,7 +698,8 @@ class ASRComparisonTool:
 
     def read_file_with_multiple_encodings(self, file_path):
         """
-        尝试使用多种编码方式读取文件内容
+        使用多种编码方式读取文件内容
+        支持常见的中文编码格式，自动检测最适合的编码
         
         Args:
             file_path (str): 文件路径
@@ -590,16 +710,16 @@ class ASRComparisonTool:
         Raises:
             Exception: 如果所有编码方式都失败则抛出异常
         """
-        # 尝试的编码格式列表
+        # 按优先级排列的编码格式列表
         encodings = ['utf-8', 'gbk', 'gb2312', 'gb18030', 'ansi']
         
-        # 存储可能的异常
+        # 记录尝试过程中的错误
         errors = []
         
-        # 依次尝试不同的编码
+        # 依次尝试不同的编码方式
         for encoding in encodings:
             try:
-                # 对于 'ansi'，我们使用系统默认编码
+                # 特殊处理：ansi使用系统默认编码
                 if encoding == 'ansi':
                     with open(file_path, 'r') as f:
                         content = f.read().strip()
@@ -608,21 +728,27 @@ class ASRComparisonTool:
                         content = f.read().strip()
                 return content
             except UnicodeDecodeError as e:
-                # 记录错误但继续尝试其他编码
+                # 记录错误信息但继续尝试下一种编码
                 errors.append((encoding, str(e)))
                 continue
         
-        # 如果所有编码都失败，抛出异常
+        # 所有编码都失败时，生成详细错误信息
         error_msg = "无法解码文件，尝试了以下编码：\n"
         for encoding, error in errors:
             error_msg += f"- {encoding}: {error}\n"
         raise Exception(error_msg)
 
     def export_results(self):
+        """
+        导出计算结果
+        支持导出为TXT和CSV两种格式
+        包含文件信息、准确率、过滤状态和分词器信息
+        """
         if not self.results:
             messagebox.showinfo("提示", "没有可导出的结果！")
             return
         
+        # 选择保存位置和格式
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("文本文件", "*.txt"), ("CSV文件", "*.csv")],
@@ -630,23 +756,25 @@ class ASRComparisonTool:
         )
         
         if not file_path:
-            return
+            return  # 用户取消了保存
             
         try:
             if file_path.endswith('.csv'):
                 # 导出为CSV格式
                 df = pd.DataFrame(self.results)
-                # 只保留基本字段和过滤状态以及分词器信息
+                # 选择要导出的列
                 df = df[['asr_file', 'ref_file', 'asr_chars', 'ref_chars', 'accuracy', 'filter_fillers', 'tokenizer']]
-                # 将过滤状态标记为更易读的文本
+                # 转换布尔值为易读文本
                 df['filter_fillers'] = df['filter_fillers'].apply(lambda x: "是" if x else "否")
-                # 重命名列名
+                # 设置中文列名
                 df.columns = ['ASR文件', '标注文件', 'ASR字数', '标注字数', '字准确率', '是否过滤语气词', '分词器']
                 df.to_csv(file_path, index=False, encoding='utf-8')
             else:
-                # 导出为TXT格式
+                # 导出为TXT格式（制表符分隔）
                 with open(file_path, 'w', encoding='utf-8') as f:
+                    # 写入表头
                     f.write("原始文件\t标注文件\tASR字数\t标注字数\t字准确率\t是否过滤语气词\t分词器\n")
+                    # 写入数据行
                     for result in self.results:
                         filter_status = "是" if result.get('filter_fillers', False) else "否"
                         tokenizer_used = result.get('tokenizer', 'unknown')
@@ -661,6 +789,10 @@ class ASRComparisonTool:
 
 
 if __name__ == "__main__":
+    """
+    程序入口点
+    创建主窗口并启动应用程序
+    """
     root = tk.Tk()
     app = ASRComparisonTool(root)
     root.mainloop()

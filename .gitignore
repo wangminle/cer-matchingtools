@@ -1,16 +1,11 @@
-# Python项目标准忽略文件
-# ================================
+# ASR字准确率对比工具 - Git忽略文件配置
+# ========================================================
+# 根据cursorrules项目规范和实际项目结构配置
 
-# 虚拟环境
-.venv/
-venv/
-ENV/
-env/
-.env
-pipenv/
-.pipenv/
+# Python 标准忽略文件
+# ========================================================
 
-# Python 缓存文件
+# 字节码文件
 __pycache__/
 *.py[cod]
 *$py.class
@@ -18,6 +13,16 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# 虚拟环境
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.*
+pipenv/
+.pipenv/
 
 # 分发 / 打包
 .Python
@@ -40,7 +45,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# PyInstaller
+# PyInstaller 生成文件
 *.manifest
 *.spec
 
@@ -66,75 +71,191 @@ profile_default/
 ipython_config.py
 
 # 系统文件
+# ========================================================
+
+# macOS 系统文件
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+
+# Windows 系统文件
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# IDE和编辑器文件
+# Linux 系统文件
+*~
+
+# IDE 和编辑器配置
+# ========================================================
+
+# VSCode / Cursor
 .vscode/
+.cursor/
+*.code-workspace
+
+# PyCharm / IntelliJ
 .idea/
+*.iml
+*.ipr
+*.iws
+
+# 其他编辑器
 *.swp
 *.swo
 *~
 .sublime-project
 .sublime-workspace
+*.kate-swp
 
-# 项目特定文件
-# ================================
+# 项目特定配置 (根据cursorrules)
+# ========================================================
 
-# 开发过程输出文件（根据cursorrules）
+# 开发过程输出文件 (cursorrules要求输出到/dev/output/)
 /dev/output/*
 !/dev/output/.gitkeep
 
-# 临时文件和日志
-*.log
-*.tmp
-temp/
-tmp/
+# 分词器模型和缓存文件
+# ========================================================
 
-# 模型文件（HanLP等大型模型）
+# HanLP 模型文件
 *.bin
 *.pkl
 *.model
 models/
 data/
+hanlp_data/
+
+# jieba 用户词典缓存
+jieba.cache
+/var/folders/*/jieba.cache
+
+# THULAC 模型文件
+thulac_data/
+*.dat
+
+# 临时文件和日志
+# ========================================================
+
+# 应用程序日志
+*.log
+logs/
+log/
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
+temporary/
+
+# 测试相关文件
+# ========================================================
 
 # 测试生成的临时文件
 /tests/temp/
 /tests/output/
+/tests/results/
 test_*.txt
 *_test_output.*
+test_results_*
 
-# 用户配置文件
+# 性能测试结果
+profile_*
+*.prof
+
+# 用户配置和数据
+# ========================================================
+
+# 用户自定义配置
 config.ini
 settings.json
 user_config.*
+*.conf
+
+# 用户数据文件
+user_data/
+*.db
+*.sqlite
+*.sqlite3
 
 # 备份文件
+# ========================================================
+
+# 各种备份文件
 *.bak
 *.orig
 *.backup
+*~
+*.old
 
 # 压缩文件
 *.zip
 *.tar.gz
+*.tar.bz2
 *.rar
 *.7z
+*.gz
 
-# 文档生成文件
+# 文档生成
+# ========================================================
+
+# Sphinx 文档生成
 _build/
 .doctrees/
+docs/_build/
 
-# 本地开发环境特定文件
+# 安全敏感文件
+# ========================================================
+
+# API密钥和敏感配置
+.env
 .env.local
 .env.development
 .env.test
 .env.production
+secrets.json
+*.key
+*.pem
 
-# 性能分析文件
-*.prof
-profile_*
+# 项目构建和发布
+# ========================================================
+
+# 构建输出（除了正式发布的）
+build/
+dist/
+*.spec
+
+# 本地开发特定文件
+# ========================================================
+
+# 本地测试数据
+local_test_data/
+my_test_*
+debug_*
+
+# 个人笔记和草稿
+notes.txt
+TODO.txt
+draft_*
+
+# 网络和缓存
+# ========================================================
+
+# 下载缓存
+.cache/
+cache/
+.wget-hsts
+
+# 特殊项目忽略
+# ========================================================
+
+# 保持重要的空目录结构（cursorrules要求）
+!*/
+!.gitkeep
+
+# 但忽略这些目录中的所有内容（除了.gitkeep）
+/ref/*/*
+!/ref/*/.gitkeep

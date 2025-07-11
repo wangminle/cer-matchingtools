@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ASR字准确率对比工具 - 历史版本(v0.1.0)
+基于jieba分词器的单一分词器版本
+
+该版本功能：
+- 基于jieba的中文分词和字准确率计算
+- 图形界面文件选择和拖拽排序
+- 语气词过滤功能
+- 结果导出为TXT/CSV格式
+
+作者：CER-MatchingTools项目组
+版本：V0.1.0
+"""
+
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
@@ -8,38 +24,59 @@ from utils import ASRMetrics
 
 
 class ASRComparisonTool:
+    """
+    ASR字准确率对比工具主类 - v0.1.0版本
+    
+    提供基于jieba分词器的字准确率计算工具
+    主要功能包括：
+    - 文件选择和管理
+    - 字准确率计算（基于jieba）
+    - 结果展示和导出
+    """
+    
     def __init__(self, root):
+        """
+        初始化ASR对比工具界面
+        
+        Args:
+            root: tkinter主窗口对象
+        """
+        # 主窗口设置
         self.root = root
         self.root.title("ASR字准确率对比工具")
         self.root.geometry("800x600")
-        # 设置窗口大小不可调整，但支持最大化
+        # 设置窗口大小可调整，支持最大化
         self.root.resizable(True, True)
-        # 设置minsize，确保窗口不会小于800x600
+        # 设置最小窗口大小，确保界面完整显示
         self.root.minsize(800, 600)
         
-        # 存储文件列表和配对信息
-        self.asr_files = []
-        self.ref_files = []
-        self.file_pairs = []
-        self.results = []
+        # 数据存储变量
+        self.asr_files = []  # ASR转写结果文件列表
+        self.ref_files = []  # 标注文件列表
+        self.file_pairs = []  # 文件配对信息
+        self.results = []  # 计算结果列表
         
         # 创建主框架分为上下两部分
         self.top_frame = ttk.Frame(root)
-        self.top_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=5)  # 不再扩展，固定上部区域高度
+        self.top_frame.pack(fill=tk.BOTH, expand=False, padx=10, pady=5)  # 固定上部区域高度
         
         self.bottom_frame = ttk.Frame(root)
-        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)  # 让下部结果区域自动扩展
+        self.bottom_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)  # 下部结果区域自动扩展
         
-        # 语气词过滤设置
-        self.filter_fillers = tk.BooleanVar(value=False)
+        # 控制变量设置
+        self.filter_fillers = tk.BooleanVar(value=False)  # 语气词过滤开关
         
-        # 提示框变量
-        self.tooltip_window = None
+        # UI辅助变量
+        self.tooltip_window = None  # 提示框窗口对象
         
         # 初始化UI组件
         self._init_ui()
     
     def _init_ui(self):
+        """
+        初始化用户界面
+        创建所有GUI组件并设置布局
+        """
         # 上半部分 - 文件选择区域
         # 创建包含左右两帧和底部按钮的上半部分框架
         self.file_area_frame = ttk.Frame(self.top_frame)
